@@ -66,8 +66,15 @@ export const authOptions: NextAuthOptions = {
 			return token;
 		},
 		async session({ session, token }: { session: Session; token: JWT }) {
+			const user = await User.findOne<IUser>({ email: session.user.email });
+
+			if (!user) {
+				return session;
+			}
+
 			session.user = {
 				...session.user,
+				role: user.role,
 				isTwoFactorComplete: (token.isTwoFactorComplete as boolean) || false,
 			};
 			return session;
