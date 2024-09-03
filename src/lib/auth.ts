@@ -1,6 +1,7 @@
 import NextAuth, { AdapterUser, NextAuthOptions, User as AuthUser, Session } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GitHubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
 import { IUser, User } from '@/models/User';
 import db from '@/lib/mongo';
 import { isPasswordValid } from '@/lib/hash';
@@ -46,6 +47,10 @@ export const authOptions: NextAuthOptions = {
 		GitHubProvider({
 			clientId: process.env.GITHUB_ID || '',
 			clientSecret: process.env.GITHUB_SECRET || '',
+		}),
+		GoogleProvider({
+			clientId: process.env.GOOGLE_ID || '',
+			clientSecret: process.env.GOOGLE_SECRET || '',
 		}),
 	],
 	session: {
