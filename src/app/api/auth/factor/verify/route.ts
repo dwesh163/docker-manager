@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
 	if (token) {
 		// Update token with 2FA completion status
 		token.isTwoFactorComplete = true;
+		token.TwoFactorExpiration = new Date(Date.now() + 1000 * 60 * 60 * 8).getTime(); // 8 hours
 
 		// Encode the updated token
 		const encodedToken = await encode({
