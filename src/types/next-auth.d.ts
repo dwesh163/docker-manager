@@ -7,7 +7,7 @@ declare module 'next-auth' {
 			name?: string | null;
 			email?: string | null;
 			image?: string | null;
-			is2FACompleted: boolean;
+			isTwoFactorComplete: boolean;
 		};
 	}
 	interface AdapterUser {
@@ -15,6 +15,6 @@ declare module 'next-auth' {
 		name: string;
 		email: string;
 		image?: string;
-		is2FACompleted: boolean;
+		isTwoFactorComplete: boolean;
 	}
 }
