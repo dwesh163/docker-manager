@@ -6,7 +6,7 @@ export interface IUser extends Document {
 	username?: string;
 	image?: string;
 	email: string;
-	password: string;
+	password?: string;
 	role: string;
 	twoFactorEnabled: boolean;
 	twoFactorSecret?: string;
@@ -17,9 +17,9 @@ const userSchema = new mongoose.Schema<IUser>({
 	username: { type: String, required: false },
 	image: { type: String, required: false },
 	email: { type: String, required: true },
-	password: { type: String, required: true },
+	password: { type: String, required: false },
 	role: { type: String, required: false, default: 'denied' },
-	twoFactorEnabled: { type: Boolean, required: false, default: false },
+	twoFactorEnabled: { type: Boolean, required: true, default: false },
 	twoFactorSecret: { type: String, required: false },
 });
 
