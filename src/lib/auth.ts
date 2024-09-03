@@ -9,8 +9,8 @@ import { JWT } from 'next-auth/jwt';
 // Define NextAuth options
 export const authOptions: NextAuthOptions = {
 	pages: {
-		signIn: '/login',
-		verifyRequest: '/login',
+		signIn: '/signin',
+		verifyRequest: '/signin',
 	},
 	providers: [
 		CredentialsProvider({
@@ -29,27 +29,25 @@ export const authOptions: NextAuthOptions = {
 					return null;
 				}
 
-				const isPasswordMatch = await isPasswordValid(credentials.password, user.password);
+				const isPasswordMatch = await isPasswordValid(credentials.password, user.password as string);
 
 				if (!isPasswordMatch) {
 					return null;
 				}
 
-				// Return user data for JWT
 				return {
 					id: user._id.toString(),
 					name: user.name,
 					email: user.email,
-					is2FACompleted: false,
+					isTwoFactorComplete: false,
 				};
 			},
 		}),
 		GitHubProvider({
-			clientId: process.env.GITHUB_CLIENT_ID || '',
-			clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+			clientId: process.env.GITHUB_ID || '',
+			clientSecret: process.env.GITHUB_SECRET || '',
 		}),
 	],
-	secret: process.env.ENCRYPTION_KEY,
 	session: {
 		strategy: 'jwt',
 		maxAge: 7 * 24 * 60 * 60, // 7 Days
@@ -57,7 +55,7 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async jwt({ token, user, account }: { token: any; user: AuthUser | AdapterUser; account: any }) {
 			if (user) {
-				token.is2FACompleted = (user as AdapterUser).is2FACompleted || false;
+				token.isTwoFactorComplete = (user as AdapterUser).isTwoFactorComplete || false;
 			}
 
 			return token;
@@ -65,7 +63,7 @@ export const authOptions: NextAuthOptions = {
 		async session({ session, token }: { session: Session; token: JWT }) {
 			session.user = {
 				...session.user,
-				is2FACompleted: (token.is2FACompleted as boolean) || false,
+				isTwoFactorComplete: (token.isTwoFactorComplete as boolean) || false,
 			};
 			return session;
 		},
