@@ -1,54 +1,69 @@
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+'use client';
 import Link from 'next/link';
-import { House, Server, Network, World, Settings, Users } from 'lucide-react';
+import { House, Server, Network, Globe, Settings, Users, Activity, KeyRound, Database, Container, Drill } from 'lucide-react';
 import { Session } from 'next-auth';
+import { usePathname } from 'next/navigation';
 
-export default function Sidebar({ session }: { session: Session }) {
+export default function Sidebar({ session, role }: { session: Session; role: string }) {
+	const pathname = usePathname();
+
 	return (
-		<aside className="flex w-1/5 flex-col border-r bg-background">
+		<aside className="flex w-1/5 flex-col border-r bg-background h-full">
 			<nav className="flex flex-col items-start gap-4 px-6 py-5">
-				<TooltipProvider>
-					<Link href="/" className="w-ful">
-						<h1 className="text-3xl font-black">Kooked Manager</h1>
+				<Link href="/" className="w-full ">
+					<h1 className="text-2xl font-black">Kooked Manager</h1>
+				</Link>
+				<div className="grid gap-2 text-xl font-medium">
+					<Link href="/" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+						<House className="h-5 w-5" />
+						Overview
 					</Link>
-					<div className="grid gap-2 text-lg font-medium">
-						<Link href="/" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
-							<House className="h-5 w-5" />
-							Overview
-						</Link>
-						<Link href="/services" className="flex items-center gap-4 px-2.5 text-foreground" prefetch={false}>
-							<Server className="h-5 w-5" />
-							Services
-						</Link>
-						<Link href="/network" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
-							<Network className="h-5 w-5" />
-							Network
-						</Link>
-						<Link href="/domain" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
-							<World className="h-5 w-5" />
-							Domain
-						</Link>
-						{session.user?.role === 'superAdmin' && (
+					<Link href="/services" className="flex items-center gap-4 px-2.5 text-foreground" prefetch={false}>
+						<Server className="h-5 w-5" />
+						Services
+					</Link>
+					<Link href="/network" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+						<Network className="h-5 w-5" />
+						Network
+					</Link>
+					<Link href="/domain" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+						<Globe className="h-5 w-5" />
+						Domain
+					</Link>
+					<Link href="/monitoring" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+						<Activity className="h-5 w-5" />
+						Monitoring
+					</Link>
+					<Link href="/backup" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+						<Database className="h-5 w-5" />
+						Backup
+					</Link>
+
+					{role === 'superadmin' && (
+						<>
+							<Link href="/secrets" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+								<KeyRound className="h-5 w-5" />
+								Secrets
+							</Link>
+							<Link href="/settings" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+								<Settings className="h-5 w-5" />
+								Settings
+							</Link>
+							<Link href="/docker" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+								<Container className="h-5 w-5" />
+								Docker
+							</Link>
+							<Link href="/builds" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
+								<Drill className="h-5 w-5" />
+								Builds
+							</Link>
 							<Link href="/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground" prefetch={false}>
 								<Users className="h-5 w-5" />
 								Users
 							</Link>
-						)}
-					</div>
-				</TooltipProvider>
-			</nav>
-			<nav className="mt-auto flex flex-col items-start gap-4 px-6 py-5">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Link href="/Setting" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8" prefetch={false}>
-								<Settings className="h-5 w-5" />
-								<span className="sr-only">Settings</span>
-							</Link>
-						</TooltipTrigger>
-						<TooltipContent side="right">Settings</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
+						</>
+					)}
+				</div>
 			</nav>
 		</aside>
 	);
