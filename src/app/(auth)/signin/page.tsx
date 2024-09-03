@@ -45,7 +45,6 @@ function LoginForm() {
 			<Link href="/" className="flex gap-2 justify-center items-center mb-8 mt-8">
 				<h1 className="text-3xl font-black">Kooked Manager</h1>
 			</Link>
-			{JSON.stringify(session)}
 			<Card className="w-full sm:w-1/2 xl:w-1/4 sm:mx-5 border-0 sm:border">
 				<CardHeader className="sm:px-6 px-3">
 					<CardTitle className="font-semibold tracking-tight text-2xl">Signin</CardTitle>
