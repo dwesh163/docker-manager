@@ -9,8 +9,25 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { Session } from 'next-auth';
 
+interface Docker {
+	id: string;
+	name: string;
+	state: string;
+	status: string;
+	image: string;
+	cpuUsage: number;
+	memoryUsage: number;
+}
+
+interface Stats {
+	running: number;
+	stopped: number;
+	totalCpuUsage: number;
+	totalMemoryUsage: number;
+}
+
 export default async function DockerPage() {
-	const { dockers, stats } = await getDockers();
+	const { dockers, stats } = (await getDockers()) as { dockers: Docker[]; stats: Stats };
 
 	const session: Session | null = await getServerSession(authOptions);
 	const role = session?.user.role;
