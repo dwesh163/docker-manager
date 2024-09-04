@@ -5,8 +5,6 @@ export async function middleware(req: NextRequest) {
 	try {
 		const token = await getToken({ req });
 
-		console.log('Token:', token);
-
 		const url = new URL(req.url);
 
 		if (token?.isTwoFactorComplete && token?.TwoFactorExpiration && (token.TwoFactorExpiration as number) < Date.now()) {
