@@ -6,6 +6,12 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Installez les outils nécessaires à la compilation
+RUN apk add --no-cache \
+    build-base \
+    python3 \
+    && rm -rf /var/cache/apk/*
+
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
