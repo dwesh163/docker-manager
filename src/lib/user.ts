@@ -10,13 +10,13 @@ export async function checkTwoFactorEnabled(session: Session): Promise<boolean> 
 	return user?.twoFactorEnabled || false;
 }
 
-export async function getRole(email: string): Promise<string | null> {
+export async function getRole(email: string): Promise<string> {
 	await db.connect();
 
 	if (!email) {
-		return null;
+		return 'denied';
 	}
 
 	const user = await User.findOne<IUser>({ email: email });
-	return user?.role || null;
+	return user?.role || 'denied';
 }
