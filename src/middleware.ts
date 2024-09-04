@@ -7,6 +7,10 @@ export async function middleware(req: NextRequest) {
 
 		const url = new URL(req.url);
 
+		if (token === null && url.pathname !== '/signin') {
+			return NextResponse.redirect(new URL('/signin', req.url));
+		}
+
 		if (token?.isTwoFactorComplete && token?.TwoFactorExpiration && (token.TwoFactorExpiration as number) < Date.now()) {
 			token.isTwoFactorComplete = false;
 			token.TwoFactorExpiration = null;
@@ -19,12 +23,8 @@ export async function middleware(req: NextRequest) {
 			return response;
 		}
 
-		if (!token?.isTwoFactorComplete && url.pathname !== '/factor' && url.pathname !== '/enable') {
+		if (token !== null && !token?.isTwoFactorComplete && url.pathname !== '/factor' && url.pathname !== '/enable') {
 			return NextResponse.redirect(new URL('/factor', req.url));
-		}
-
-		if (token === null && url.pathname !== '/signin') {
-			return NextResponse.redirect(new URL('/signin', req.url));
 		}
 
 		return NextResponse.next();
