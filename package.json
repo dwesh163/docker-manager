@@ -39,6 +39,7 @@
     "@types/dockerode": "^3.3.31",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "node-loader": "^2.0.0",
