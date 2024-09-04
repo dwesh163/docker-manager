@@ -16,6 +16,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
 	const role = await getRole(session?.user.email as string);
 
+	if (role === 'denied') {
+		redirect('/signin');
+	}
+
 	return (
 		<div className="flex h-screen">
 			<Sidebar session={session} role={role} />
