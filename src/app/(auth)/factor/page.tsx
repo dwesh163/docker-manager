@@ -8,7 +8,6 @@ export default async function EnablePage() {
 	const session = await getServerSession();
 	const isTwoFactorEnabled = await checkTwoFactorEnabled(session as Session);
 
-	console.log('isTwoFactorEnabled', isTwoFactorEnabled);
 
 	if (!isTwoFactorEnabled) {
 		redirect('/enable');

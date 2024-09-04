@@ -10,7 +10,6 @@ import { Session } from 'next-auth';
 export async function POST(req: NextRequest) {
 	const session: Session | null = await getServerSession(authOptions);
 
-	console.log('session', session);
 
 	if (!session) {
 		return NextResponse.json({ message: 'Not authenticated.' }, { status: 401 });
@@ -23,11 +22,9 @@ export async function POST(req: NextRequest) {
 
 	await db.connect();
 
-	console.log('session.user?.email', session.user?.email);
 
 	const user = await User.findOne<IUser>({ email: session.user?.email });
 
-	console.log('user', user);
 
 	if (!user) {
 		console.error(`Session references user that no longer exists.`);
@@ -56,7 +53,6 @@ export async function POST(req: NextRequest) {
 
 	const { otp } = await req.json();
 
-	console.log('otp', otp);
 
 	const isValidToken = authenticator.check(otp, secret);
 	if (!isValidToken) {

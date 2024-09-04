@@ -28,7 +28,6 @@ export default function TwoFactorAuth() {
 			const body = await response.json();
 
 			if (response.status === 200) {
-				console.log(body);
 				router.push('/');
 				return;
 			}
