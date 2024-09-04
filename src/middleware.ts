@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
 			return NextResponse.redirect(new URL('/factor', req.url));
 		}
 
-		if (token === null) {
+		if (token === null && url.pathname !== '/signin') {
 			return NextResponse.redirect(new URL('/signin', req.url));
 		}
 
