@@ -99,8 +99,8 @@ export const authOptions: NextAuthOptions = {
 			return true;
 		},
 		async redirect({ url, baseUrl }) {
-			console.log('Redirect url:', url);
-			return baseUrl;
+			console.log('Redirect url:', new URL('/factor', process.env.NEXTAUTH_URL).toString());
+			return new URL('/factor', process.env.NEXTAUTH_URL).toString();
 		},
 	},
 };
