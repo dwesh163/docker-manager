@@ -98,10 +98,10 @@ export const authOptions: NextAuthOptions = {
 
 			return true;
 		},
-		// async redirect({ url, baseUrl }) {
-		// 	console.log(url, baseUrl);
-		// 	return process.env.NEXTAUTH_URL || baseUrl;
-		// },
+		async redirect({ url, baseUrl }) {
+			console.log(url, baseUrl);
+			return process.env.NEXTAUTH_URL || baseUrl;
+		},
 	},
 };
 
