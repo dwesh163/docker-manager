@@ -98,10 +98,6 @@ export const authOptions: NextAuthOptions = {
 
 			return true;
 		},
-		async redirect({ url, baseUrl }) {
-			console.log(url, baseUrl);
-			return 'https://manager.kooked.ch' || baseUrl;
-		},
 	},
 };
 
