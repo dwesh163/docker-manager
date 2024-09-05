@@ -100,7 +100,7 @@ export const authOptions: NextAuthOptions = {
 		},
 		async redirect({ url, baseUrl }) {
 			console.log(url, baseUrl);
-			return process.env.NEXTAUTH_URL || baseUrl;
+			return 'manager.kooked.ch' || baseUrl;
 		},
 	},
 };
