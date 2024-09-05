@@ -19,7 +19,11 @@ export async function middleware(req: NextRequest) {
 				secret: process.env.NEXTAUTH_SECRET!,
 			});
 			const response = NextResponse.redirect(new URL('/', req.url));
-			response.headers.set('Set-Cookie', `next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
+			if (process.env.NODE_ENV !== 'production') {
+				response.headers.set('Set-Cookie', `next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
+			} else {
+				response.headers.set('Set-Cookie', `__Secure-next-auth.session-token=${encodedToken}; Path=/; HttpOnly; SameSite=Lax;`);
+			}
 			return response;
 		}
 
