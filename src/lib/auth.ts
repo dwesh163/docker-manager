@@ -66,6 +66,7 @@ export const authOptions: NextAuthOptions = {
 			return token;
 		},
 		async session({ session, token }: { session: Session; token: JWT }) {
+			await db.connect();
 			const user = await User.findOne<IUser>({ email: session.user.email });
 
 			if (!user) {
