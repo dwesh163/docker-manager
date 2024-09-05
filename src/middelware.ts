@@ -5,6 +5,8 @@ export async function middleware(req: NextRequest) {
 	try {
 		const token = await getToken({ req });
 
+		console.log('token', token);
+
 		const url = new URL(req.url);
 
 		if (token === null && url.pathname !== '/signin') {
