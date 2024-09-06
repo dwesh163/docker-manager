@@ -16,14 +16,17 @@ export async function middleware(req: NextRequest) {
 		if (token?.isTwoFactorComplete && token?.TwoFactorExpiration && (token.TwoFactorExpiration as number) < Date.now()) {
 			token.isTwoFactorComplete = false;
 			token.TwoFactorExpiration = null;
+			console.log('token2', token);
 			const encodedToken = await encode({
 				token,
 				secret: process.env.NEXTAUTH_SECRET!,
 			});
 			const response = NextResponse.redirect(new URL('/', req.url));
+			console.log('env', process.env.NODE_ENV);
 			if (process.env.NODE_ENV !== 'production') {
 				response.headers.set('Set-Cookie', `next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
 			} else {
+				console.log('prod');
 				response.headers.set('Set-Cookie', `__Secure-next-auth.session-token=${encodedToken}; Path=/; HttpOnly; SameSite=Lax;`);
 			}
 			return response;
