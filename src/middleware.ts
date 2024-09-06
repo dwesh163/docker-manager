@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
 				response.headers.set('Set-Cookie', `next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
 			} else {
 				console.log('prod');
-				response.headers.set('Set-Cookie', `__Secure-next-auth.session-token=${encodedToken}; Path=/; HttpOnly; SameSite=Lax;`);
+				response.headers.set('Set-Cookie', `__Secure-next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
 			}
 			return response;
 		}
@@ -51,6 +51,6 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 */
-		'/((?!api|_next/static|_next/image|favicon.ico).*)',
+		'/((?!api|_next/static|_next/image|factor|favicon.ico).*)',
 	],
 };
