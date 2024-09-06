@@ -50,7 +50,12 @@ export async function POST(req: NextRequest) {
 
 		// Set the updated JWT token in the response header
 		const response = NextResponse.json({ message: '2FA verification successful' }, { status: 200 });
-		response.headers.set('Set-Cookie', `next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
+		if (process.env.NODE_ENV !== 'production') {
+			response.headers.set('Set-Cookie', `next-auth.session-token=${encodedToken}; Path=/; HttpOnly; Secure; SameSite=Lax;`);
+		} else {
+			console.log('prod');
+			response.headers.set('Set-Cookie', `__Secure-next-auth.session-token=${encodedToken}; Path=/; HttpOnly; SameSite=Lax;`);
+		}
 
 		return response;
 	}
