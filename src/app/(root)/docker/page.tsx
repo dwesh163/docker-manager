@@ -31,7 +31,7 @@ export default async function DockerPage() {
 
 	const session: Session | null = await getServerSession(authOptions);
 	const role = session?.user.role;
-	if (session && role !== 'superadmin') {
+	if (session && !role?.includes('admin')) {
 		redirect('/');
 	}
 

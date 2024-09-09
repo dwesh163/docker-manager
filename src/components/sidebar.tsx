@@ -9,7 +9,7 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 	const pathname = usePathname();
 
 	return (
-		<aside className="flex w-1/5 flex-col border-r bg-background h-full">
+		<aside className="flex w-1/5 min-w-[250px] flex-col border-r bg-background h-full">
 			<nav className="flex flex-col items-start gap-4 px-6 py-5">
 				<Link href="/" className="w-full ">
 					<h1 className="text-2xl font-black">Kooked Manager</h1>
@@ -40,7 +40,7 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 						Backup
 					</Link>
 
-					{role === 'superadmin' && (
+					{role?.includes('admin') && (
 						<>
 							<Link href="/secrets" className={cn('flex items-center gap-4 px-2.5', pathname === '/secrets' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 								<KeyRound className="h-5 w-5" />
