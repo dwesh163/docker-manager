@@ -92,7 +92,7 @@ export const authOptions: NextAuthOptions = {
 					image: user.image || profile?.image || null,
 					provider: provider,
 					name: profile?.name || user.name,
-					verified: provider === 'google' || provider === 'github' ? 2 : 1,
+					verified: provider === 'google' || provider === 'github' ? true : false,
 				});
 				await newUser.save();
 			}
