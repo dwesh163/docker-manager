@@ -10,6 +10,7 @@ export interface IUser extends Document {
 	role: string;
 	twoFactorEnabled: boolean;
 	twoFactorSecret?: string;
+	verified?: boolean;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -21,6 +22,7 @@ const userSchema = new mongoose.Schema<IUser>({
 	role: { type: String, required: false, default: 'denied' },
 	twoFactorEnabled: { type: Boolean, required: true, default: false },
 	twoFactorSecret: { type: String, required: false },
+	verified: { type: Boolean, required: true, default: false },
 });
 
 export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
