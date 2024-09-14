@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoveHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useRouter } from 'next/navigation';
 
 const PAGE_SIZE = 5;
 
@@ -15,6 +16,7 @@ export default function DockerTable({ dockers, stats }: { dockers: any[]; stats:
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndex = startIndex + PAGE_SIZE;
+	const router = useRouter();
 
 	const paginatedDockers = dockers.slice(startIndex, endIndex);
 
@@ -25,6 +27,10 @@ export default function DockerTable({ dockers, stats }: { dockers: any[]; stats:
 			setCurrentPage(page);
 		}
 	};
+
+	useEffect(() => {
+		router.refresh();
+	}, []);
 
 	return (
 		<Card className="h-full w-full">
