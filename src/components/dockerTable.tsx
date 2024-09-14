@@ -28,10 +28,6 @@ export default function DockerTable({ dockers, stats }: { dockers: any[]; stats:
 		}
 	};
 
-	useEffect(() => {
-		router.refresh();
-	}, []);
-
 	return (
 		<Card className="h-full w-full">
 			<CardHeader className="px-7">
