@@ -45,3 +45,15 @@ export async function getUsers(email: string): Promise<UserType[]> {
 		};
 	});
 }
+
+export async function checkUserAccess(session: Session, url: string): Promise<boolean> {
+	await db.connect();
+
+	const user = await User.findOne<IUser>({ email: session.user.email });
+
+	if (!user) {
+		return false;
+	}
+
+	return user?.role.includes('admin') || false;
+}
