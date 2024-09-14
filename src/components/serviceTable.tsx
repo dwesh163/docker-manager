@@ -51,7 +51,7 @@ export function ServiceTable({ services }: { services: ServicesType[] }) {
 					</TableHeader>
 					<TableBody>
 						{paginatedServices.map((s) => (
-							<TableRow key={s.id}>
+							<TableRow key={s.id} className="cursor-pointer" onClick={() => router.push(`/services/${s.id}`)}>
 								<TableCell className="font-medium">{s.name}</TableCell>
 								<TableCell>
 									<Badge variant={s.status === 'running' ? 'secondary' : 'outline'}>{s.status}</Badge>
