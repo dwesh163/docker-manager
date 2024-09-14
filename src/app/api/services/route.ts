@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 		return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
 	}
 
-	const service = await createService({ name, description, owner: session.user.email });
+	const service = await createService({ name, description, owner: session.user.email || '' });
 
 	if (service.error) {
 		return NextResponse.json({ error: service.error }, { status: service.status });
