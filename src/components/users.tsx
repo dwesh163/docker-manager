@@ -2,29 +2,19 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { User } from '@/types/user';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 10;
 
-export function UsersTable({ users }: { users: User[] }) {
+export function UsersTable({ usersData }: { usersData: User[] }) {
 	const [currentPage, setCurrentPage] = useState(1);
-
-	const startIndex = (currentPage - 1) * PAGE_SIZE;
-	const endIndex = startIndex + PAGE_SIZE;
-
-	const paginatedUsers = users.slice(startIndex, endIndex);
-
-	const totalPages = Math.ceil(users.length / PAGE_SIZE);
-
-	const [search, setSearch] = useState<string>('');
+	const [users, setUsers] = useState<User[]>(usersData);
+	const [openPopover, setOpenPopover] = useState<number | null>(null);
 	const [accred, setAccred] = useState<Record<string, { name: string; description: string }>>({
 		superadmin: { name: 'Super Admin', description: 'Can view, edit, manage, and delete' },
 		admin: { name: 'Admin', description: "Email isn't verified, state is unmodifiable" },
@@ -32,9 +22,12 @@ export function UsersTable({ users }: { users: User[] }) {
 		denied: { name: 'Denied', description: 'Can view' },
 	});
 
-	const [loading, setLoading] = useState<boolean>(false);
-	const [error, setError] = useState<string | null>(null);
-	const [openPopover, setOpenPopover] = useState<number | null>(null);
+	const startIndex = (currentPage - 1) * PAGE_SIZE;
+	const endIndex = startIndex + PAGE_SIZE;
+
+	const paginatedUsers = users.slice(startIndex, endIndex);
+
+	const totalPages = Math.ceil(users.length / PAGE_SIZE);
 
 	const goToPage = (page: number) => {
 		if (page > 0 && page <= totalPages) {
