@@ -1,4 +1,4 @@
-import { Container, Cpu, MemoryStick, MoveHorizontal } from 'lucide-react';
+import { Container, Cpu, MemoryStick } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
