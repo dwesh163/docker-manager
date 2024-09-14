@@ -31,8 +31,8 @@ export function UserDropdown({ session }: { session: Session | null }) {
 
 			<DropdownMenuContent side="bottom" align="end" className="max-w-[300px] *:cursor-pointer">
 				<DropdownMenuLabel className="flex flex-col">
-					<span title={session?.user?.name ?? undefined} className="truncate">
-						{session?.user ? (session?.user.name ? session?.user.name : '~') : 'Guest User'}
+					<span title={session?.user?.name ?? undefined} className="truncate capitalize">
+						{session?.user.name || session?.user.username}
 					</span>
 					<span title={session?.user?.email ?? undefined} className="truncate text-sm font-normal text-muted-foreground">
 						{session?.user?.email}
