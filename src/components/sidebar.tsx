@@ -14,7 +14,8 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 				<Link href="/" className="w-full ">
 					<h1 className="text-2xl font-black">Kooked Manager</h1>
 				</Link>
-				<div className="grid gap-2 text-xl font-medium">
+				<h3 className="text-lg font-medium text-muted-foreground">Main</h3>
+				<div className="grid gap-2 text-xl font-medium -mt-3">
 					<Link href="/" className={cn('flex items-center gap-4 px-2.5', pathname === '/' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 						<House className="h-5 w-5" />
 						Overview
@@ -39,7 +40,9 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 						<Database className="h-5 w-5" />
 						Backup
 					</Link>
-
+				</div>
+				<h3 className="text-lg font-medium text-muted-foreground">Admin</h3>
+				<div className="grid gap-2 text-xl font-medium -mt-3">
 					{role?.includes('admin') && (
 						<>
 							<Link href="/secrets" className={cn('flex items-center gap-4 px-2.5', pathname === '/secrets' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
