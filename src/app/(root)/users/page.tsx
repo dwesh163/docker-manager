@@ -16,7 +16,7 @@ export default async function UsersPage() {
 
 	return (
 		<div className="flex flex-col items-center flex-1 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-			<UsersTable users={users} />
+			<UsersTable usersData={users} />
 		</div>
 	);
 }
