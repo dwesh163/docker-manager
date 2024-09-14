@@ -20,7 +20,7 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 						<House className="h-5 w-5" />
 						Overview
 					</Link>
-					<Link href="/services" className={cn('flex items-center gap-4 px-2.5', pathname === '/services' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
+					<Link href="/services" className={cn('flex items-center gap-4 px-2.5', pathname.startsWith('/services') ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 						<Server className="h-5 w-5" />
 						Services
 					</Link>
