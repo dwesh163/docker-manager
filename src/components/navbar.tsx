@@ -1,12 +1,18 @@
+'use client';
+
 import { Session } from 'next-auth';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { UserDropdown } from './user-dropdown';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 
 export default function Navbar({ session }: { session: Session }) {
+	const pathname = usePathname();
+	const pathSegments = pathname.split('/').filter((segment) => segment);
+
 	return (
 		<header className="w-full flex justify-between p-4 px-6">
 			<Breadcrumb className="hidden md:flex">
@@ -18,10 +24,28 @@ export default function Navbar({ session }: { session: Session }) {
 							</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
-					<BreadcrumbSeparator />
-					<BreadcrumbItem>
-						<BreadcrumbPage>Docker</BreadcrumbPage>
-					</BreadcrumbItem>
+					{pathSegments.length > 0 && <BreadcrumbSeparator />}
+					{pathSegments.map((segment, index) => {
+						const href = '/' + pathSegments.slice(0, index + 1).join('/');
+						const isLast = index === pathSegments.length - 1;
+
+						return (
+							<>
+								<BreadcrumbItem key={href}>
+									{!isLast ? (
+										<BreadcrumbLink asChild>
+											<Link href={href} prefetch={false}>
+												{segment.charAt(0).toUpperCase() + segment.slice(1)}
+											</Link>
+										</BreadcrumbLink>
+									) : (
+										<BreadcrumbPage>{segment.charAt(0).toUpperCase() + segment.slice(1)}</BreadcrumbPage>
+									)}
+								</BreadcrumbItem>
+								{!isLast && <BreadcrumbSeparator />}
+							</>
+						);
+					})}
 				</BreadcrumbList>
 			</Breadcrumb>
 			<div className="flex items-center gap-4">
