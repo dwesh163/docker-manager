@@ -18,7 +18,7 @@ import { getServices } from '@/lib/service';
 import { Plus } from 'lucide-react';
 import { ServiceTable } from '@/components/serviceTable';
 
-export default async function DockerPage() {
+export default async function ServicesPage() {
 	const session: Session | null = await getServerSession(authOptions);
 	const services = await getServices(session?.user.email);
 	const stats = {
