@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import { Session } from 'next-auth';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,8 +30,8 @@ export default function Navbar({ session }: { session: Session }) {
 						const isLast = index === pathSegments.length - 1;
 
 						return (
-							<>
-								<BreadcrumbItem key={href}>
+							<React.Fragment key={'Bread' + index}>
+								<BreadcrumbItem>
 									{!isLast ? (
 										<BreadcrumbLink asChild>
 											<Link href={href} prefetch={false}>
@@ -43,7 +43,7 @@ export default function Navbar({ session }: { session: Session }) {
 									)}
 								</BreadcrumbItem>
 								{!isLast && <BreadcrumbSeparator />}
-							</>
+							</React.Fragment>
 						);
 					})}
 				</BreadcrumbList>
