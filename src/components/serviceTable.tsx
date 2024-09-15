@@ -4,11 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
-import { MoveHorizontal } from 'lucide-react';
+import { CircleAlert, Globe, MoveHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { ServicesType } from '@/types/service';
-import { CreateServiceForm } from '@/components/forms/CreateServiceForm';
+import { CreateServiceForm } from '@/components/forms/createServiceForm';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const PAGE_SIZE = 5;
 
@@ -45,7 +48,8 @@ export function ServiceTable({ services }: { services: ServicesType[] }) {
 					<TableHeader>
 						<TableRow className="hover:bg-card">
 							<TableHead className="w-[15%]">Name</TableHead>
-							<TableHead className="w-[70%]">Status</TableHead>
+							<TableHead className="w-[20%]">Status</TableHead>
+							<TableHead className="w-[50%]">Repository</TableHead>
 							<TableHead>Actions</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -54,7 +58,24 @@ export function ServiceTable({ services }: { services: ServicesType[] }) {
 							<TableRow key={s.id} className="cursor-pointer" onClick={() => router.push(`/services/${s.id}`)}>
 								<TableCell className="font-medium">{s.name}</TableCell>
 								<TableCell>
-									<Badge variant={s.status === 'running' ? 'secondary' : 'outline'}>{s.status}</Badge>
+									<div className="flex gap-2">
+										<div className={cn('flex gap-1', s.status === 'running' ? 'text-green-500' : 'text-red-500')}>
+											{s.status === 'running' ? <Globe className="h-5 w-5 mt-0.5" /> : <CircleAlert className="h-5 w-5 mt-0.5" />}
+											<p className="text-base">{s.status === 'running' ? 'Online' : 'Offline'}</p>
+										</div>
+										{s.url && <p className="text-base">-</p>}
+										<Link href={'http://' + s.url} target="_blank" className="flex gap-1">
+											{s.url}
+										</Link>
+									</div>
+								</TableCell>
+								<TableCell>
+									{s.repository && (
+										<div className="flex gap-2 items-center cursor-pointer">
+											{s?.repository?.image ? <Image src={s?.repository?.image} alt="Repository owner" width={32} height={32} className="rounded-full" /> : <div className="w-8 h-8 bg-background rounded-full" />}
+											<p className="text-base">{s?.repository?.url.replace('https://github.com/', '')}</p>
+										</div>
+									)}
 								</TableCell>
 								<TableCell>
 									<DropdownMenu>
