@@ -7,6 +7,14 @@ export interface IDocker extends Document {
 	status: string;
 	currentStatus: string;
 	startedAt: Date;
+	mounts: {
+		source: string;
+		target: string;
+	}[];
+	ports: {
+		in: number;
+		out?: number;
+	}[];
 }
 
 const dockerSchema = new mongoose.Schema<IDocker>({
@@ -15,6 +23,8 @@ const dockerSchema = new mongoose.Schema<IDocker>({
 	status: { type: String, required: true },
 	currentStatus: { type: String, required: true },
 	startedAt: { type: Date, required: true, default: Date.now },
+	mounts: [{ type: { source: String, target: String } }],
+	ports: [{ type: { in: Number, out: Number } }],
 });
 
 export const Docker = mongoose.models.Docker || mongoose.model<IDocker>('Docker', dockerSchema);
