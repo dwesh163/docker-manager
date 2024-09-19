@@ -64,9 +64,7 @@ export function ServiceTable({ services }: { services: ServicesType[] }) {
 											<p className="text-base">{s.status === 'running' ? 'Online' : 'Offline'}</p>
 										</div>
 										{s.url && <p className="text-base">-</p>}
-										<Link href={'http://' + s.url} target="_blank" className="flex gap-1">
-											{s.url}
-										</Link>
+										{s.url}
 									</div>
 								</TableCell>
 								<TableCell>
