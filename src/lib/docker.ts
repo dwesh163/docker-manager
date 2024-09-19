@@ -1,4 +1,8 @@
 import Docker from 'dockerode';
+import { getService } from './service';
+import { Docker as DockerModel } from '@/models/Docker';
+import { Service } from '@/models/Service';
+import { Image } from '@/models/Image';
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock', version: 'v1.46' });
 
@@ -22,7 +26,6 @@ export async function getDockers() {
 				cpuPercent = (cpuDelta / systemDelta) * numCpus * 100;
 			}
 
-
 			return {
 				id: d.Id,
 				name: d.Names[0].slice(1),
@@ -43,12 +46,128 @@ export async function getDockers() {
 			totalMemoryUsage: data.map((d) => d.memoryUsage || 0).reduce((a, b) => a + b, 0),
 		};
 
-
 		return {
 			dockers: data,
 			stats,
 		};
 	} catch (error) {
 		console.error('Error getting Docker stats:', error);
+	}
+}
+
+export async function createDocker({ name, image, serviceId, owner }: { name: string; image: string; serviceId: string; owner: string }) {
+	try {
+		const service = await getService(owner, serviceId);
+
+		if (!service) {
+			return { error: 'Service not found', status: 404 };
+		}
+
+		const existingDocker = await DockerModel.findOne({ name: `${service.slug}-${name}` });
+
+		if (existingDocker) {
+			return { error: 'Docker container already exists', status: 400 };
+		}
+
+		const newDocker = await DockerModel.create({
+			name: `${service.slug}-${name}`,
+			status: 'starting',
+			image,
+			service: serviceId,
+			currentStatus: 'starting',
+		});
+
+		await Service.updateOne({ $push: { dockers: newDocker._id } });
+
+		continueDockerCreation(newDocker, image, service.slug, name);
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error creating Docker container:', error);
+		return { error: 'Error creating Docker container', status: 500 };
+	}
+}
+
+async function continueDockerCreation(newDocker: any, image: string, serviceSlug: string, name: string) {
+	try {
+		await ensureImageExists(image);
+
+		const container = await docker.createContainer({
+			name: `${serviceSlug}-${name}`,
+			Image: image,
+		});
+
+		await container.start();
+		console.log('Container started:', container);
+
+		const containerDetails = await container.inspect();
+		const containerStatus = containerDetails.State.Status;
+
+		await DockerModel.updateOne(
+			{ _id: newDocker._id },
+			{
+				$set: {
+					status: 'running',
+					currentStatus: containerStatus,
+					id: container.id,
+				},
+			}
+		);
+	} catch (error) {
+		console.error('Error starting Docker container:', error);
+		await DockerModel.updateOne(
+			{ _id: newDocker._id },
+			{
+				$set: { status: 'failed', currentStatus: 'failed' },
+			}
+		);
+	}
+}
+
+export async function ensureImageExists(image: string) {
+	const saveImage = async (imageName: string) => {
+		const existingImage = await Image.findOne({ name: imageName });
+
+		if (existingImage) {
+			return;
+		}
+
+		const images = await docker.listImages({ filters: { reference: [imageName] } });
+
+		if (images.length > 0) {
+			await Image.create({
+				name: imageName,
+				id: images[0].Id.replace('sha256:', ''),
+				size: images[0].Size,
+				createdAt: new Date(images[0].Created * 1000),
+			});
+		}
+	};
+
+	try {
+		const images = await docker.listImages({ filters: { reference: [image] } });
+
+		if (images.length === 0) {
+			await new Promise((resolve, reject) => {
+				docker.pull(image, {}, (err, stream) => {
+					if (err) {
+						return reject(err);
+					}
+					if (stream) {
+						docker.modem.followProgress(stream, (done: any) => {
+							saveImage(image).then(resolve).catch(reject);
+						});
+					}
+				});
+			});
+
+			return true;
+		} else {
+			await saveImage(image);
+			return true;
+		}
+	} catch (error) {
+		console.error("Erreur lors de la vérification/téléchargement de l'image:", error);
+		return false;
 	}
 }
