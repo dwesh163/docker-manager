@@ -6,16 +6,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { EditServiceForm } from '@/components/forms/editServiceForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MoveHorizontal } from 'lucide-react';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { useRouter } from 'next/navigation';
 import { DockerType } from '@/types/docker';
+import { useRouter, usePathname } from 'next/navigation';
+import { CreateDockerForm } from '@/components/forms/createDockerForm';
+import moment from 'moment';
 
 export function Service({ service }: { service: ServiceType }) {
 	return (
@@ -71,7 +70,7 @@ export function Service({ service }: { service: ServiceType }) {
 			</div>
 			<Tabs defaultValue="dockers" className="mt-12">
 				<TabsList>
-					<TabsTrigger value="dockers">Dockers</TabsTrigger>
+					<TabsTrigger value="dockers">Containers</TabsTrigger>
 					<TabsTrigger value="users">Users</TabsTrigger>
 					<TabsTrigger value="secrets">Secrets</TabsTrigger>
 					<TabsTrigger value="build">Build</TabsTrigger>
@@ -95,6 +94,8 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndex = startIndex + PAGE_SIZE;
 	const router = useRouter();
+	const pathname = usePathname();
+	const ServiceId = pathname.split('/')[2];
 
 	const paginatedDockers = dockers.slice(startIndex, endIndex);
 
@@ -114,6 +115,7 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 						<CardTitle>Containers</CardTitle>
 						<CardDescription>Manage and monitor your Docker containers.</CardDescription>
 					</div>
+					<CreateDockerForm ServiceId={ServiceId} />
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -123,16 +125,20 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 							<TableHead className="w-[15%]">Name</TableHead>
 							<TableHead className="w-[20%]">Status</TableHead>
 							<TableHead className="w-[30%]">Image</TableHead>
+							<TableHead>Started</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{paginatedDockers.map((d) => (
-							<TableRow key={d.id}>
+						{paginatedDockers.map((d, index) => (
+							<TableRow key={'docker' + index}>
 								<TableCell className="font-medium">{d.name}</TableCell>
 								<TableCell>
-									<Badge variant={d.status.includes('Up') ? 'secondary' : 'outline'}>{d.status}</Badge>
+									<Badge className={cn(d.status == 'running' && 'bg-green-500 hover:bg-green-600', d.status == 'starting' && 'bg-orange-500 hover:bg-orange-600', d.status == 'failed' && 'bg-red-500 hover:bg-red-600', 'text-white select-none w-20 flex justify-center text-center')} variant={d.status == 'running' ? 'secondary' : 'outline'}>
+										{d.status}
+									</Badge>
 								</TableCell>
 								<TableCell>{d.image}</TableCell>
+								<TableCell>{d.startedAt && <p className="text-xs text-muted-foreground">Started {moment(new Date(d.startedAt), 'YYYYMMDD').fromNow()}</p>}</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
