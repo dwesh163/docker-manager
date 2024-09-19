@@ -1,9 +1,10 @@
-import { IService, Service } from '@/models/Services';
+import { IService, Service } from '@/models/Service';
 import db from './mongo';
 import { ServicesType, ServiceType } from '@/types/service';
 import { getRole } from './user';
 import { IUser, User } from '@/models/User';
 import { ErrorType } from '@/types/error';
+import { Docker } from '@/models/Docker';
 
 export async function getServices(email: string | null | undefined): Promise<ServicesType[]> {
 	await db.connect();
@@ -37,7 +38,8 @@ export async function getServices(email: string | null | undefined): Promise<Ser
 				name: service.name,
 				status: service.status,
 				url: service.url,
-				repository: service.repository?.url ? service.repository : null,
+				repository: service.repository?.url ? { url: service.repository.url, image: service.repository.image } : null,
+				slug: service.slug,
 			};
 		})
 	);
@@ -46,45 +48,61 @@ export async function getServices(email: string | null | undefined): Promise<Ser
 }
 
 export async function getService(email: string | null | undefined, id: string): Promise<ServiceType | null> {
-	await db.connect();
+	try {
+		await db.connect();
 
-	if (!email) {
-		return null;
-	}
-
-	const role = await getRole(email);
-
-	let service;
-
-	if (role.includes('admin')) {
-		service = await Service.findOne<IService>({ _id: id }, { _id: 0 });
-	} else {
-		const user = await User.findOne<IUser>({ email });
-
-		if (!user) {
+		if (!email) {
 			return null;
 		}
 
-		service = await Service.findOne<IService>(
-			{
-				$or: [{ owner: user._id }, { users: user._id }],
-			},
-			{ _id: 0 }
-		);
-	}
+		const role = await getRole(email);
+		let service;
 
-	if (!service) {
+		if (role.includes('admin')) {
+			service = await Service.findOne<IService>({ _id: id }, { _id: 0 });
+			console.log(service);
+		} else {
+			const user = await User.findOne<IUser>({ email });
+
+			if (!user) {
+				return null;
+			}
+
+			service = await Service.findOne<IService>(
+				{
+					$or: [{ owner: user._id }, { users: user._id }],
+				},
+				{ _id: 0 }
+			);
+		}
+
+		console.log(service);
+
+		if (!service) {
+			return null;
+		}
+
+		const owner = await User.findOne<IUser>({ _id: service.owner });
+
+		if (service.dockers.length !== 0) {
+			service.dockers = await Docker.find(
+				{
+					_id: { $in: service.dockers },
+				},
+				{ _id: 0 }
+			);
+		}
+
+		return {
+			...service.toObject(),
+			owner: owner?.name,
+			repository: service.repository?.url ? { url: service.repository.url, image: service.repository.image } : null,
+			id,
+		};
+	} catch (error) {
+		console.error('Erreur lors de la récupération du service:', error);
 		return null;
 	}
-
-	const owner = await User.findOne<IUser>({ _id: service.owner });
-
-	return {
-		...service.toObject(),
-		owner: owner?.name,
-		repository: service.repository?.url ? service.repository : null,
-		id,
-	};
 }
 
 export async function createService(data: { name: string; description: string; owner: string }): Promise<ErrorType> {
@@ -104,6 +122,7 @@ export async function createService(data: { name: string; description: string; o
 		description: data.description,
 		owner: user,
 		users: [],
+		slug: data.name.toLowerCase().replace(/ /g, '-'),
 	});
 
 	if (!service) {
