@@ -19,7 +19,7 @@ export async function POST(req: Request, { params }: { params: Params }) {
 		return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
 	}
 
-	const docker = await createDocker({ name, image: image.includes(':') ? image : `${image}:latest`, serviceId: params.serviceId, owner: session.user.email || '' });
+	const docker = await createDocker({ name: name.replaceAll(' ', '-').replaceAll(/[^a-zA-Z0-9_.-]/g, ''), image: image.includes(':') ? image.toLowerCase() : `${image.toLowerCase()}:latest`, serviceId: params.serviceId, owner: session.user.email || '' });
 
 	if (docker.error) {
 		return NextResponse.json({ error: docker.error }, { status: docker.status });
