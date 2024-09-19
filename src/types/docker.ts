@@ -3,4 +3,6 @@ export type DockerType = {
 	name: string;
 	status: string;
 	image: string;
+	currentStatus: string;
+	startedAt: Date;
 };

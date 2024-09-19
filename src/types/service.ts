@@ -4,6 +4,7 @@ export interface ServicesType {
 	name: string;
 	status: string;
 	url: string;
+	slug: string;
 	repository: {
 		url: string;
 		image: string;
@@ -19,6 +20,7 @@ export interface ServiceType {
 	users: string[];
 	dockers: DockerType[];
 	url: string;
+	slug: string;
 	repository: {
 		url: string;
 		image: string;
