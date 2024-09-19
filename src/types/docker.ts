@@ -5,4 +5,12 @@ export type DockerType = {
 	image: string;
 	currentStatus: string;
 	startedAt: Date;
+	mounts: {
+		source: string;
+		target: string;
+	}[];
+	ports: {
+		in: number;
+		out?: number;
+	}[];
 };
