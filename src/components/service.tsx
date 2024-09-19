@@ -119,12 +119,13 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<Table>
+				<Table className="text-base">
 					<TableHeader>
 						<TableRow className="hover:bg-card">
-							<TableHead className="w-[15%]">Name</TableHead>
-							<TableHead className="w-[20%]">Status</TableHead>
-							<TableHead className="w-[30%]">Image</TableHead>
+							<TableHead className="w-[20%]">Name</TableHead>
+							<TableHead className="w-[10%]">Status</TableHead>
+							<TableHead className="w-[15%]">Image</TableHead>
+							<TableHead className="w-[30%]">Ports</TableHead>
 							<TableHead>Started</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -138,7 +139,16 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 									</Badge>
 								</TableCell>
 								<TableCell>{d.image}</TableCell>
-								<TableCell>{d.startedAt && <p className="text-xs text-muted-foreground">Started {moment(new Date(d.startedAt), 'YYYYMMDD').fromNow()}</p>}</TableCell>
+								<TableCell className="flex gap-1">
+									{d.ports.map((p, index) => (
+										<p key={'port' + index}>
+											{p.in}
+											{p.out ? `:${p.out}` : '/tcp'}
+											{index !== d.ports.length - 1 && ','}{' '}
+										</p>
+									))}
+								</TableCell>
+								<TableCell>{d.startedAt && <p className="text-muted-foreground">Started {moment(new Date(d.startedAt), 'YYYYMMDD').fromNow()}</p>}</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
