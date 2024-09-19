@@ -131,7 +131,6 @@ function CreateFromDockerfile() {
 			<Label htmlFor="dockerfile" className="text-right">
 				Dockerfile
 			</Label>
-			<Input id="dockerfile" value={dockerfile} onChange={(e) => setDockerfile(e.target.value)} className="col-span-3" />
 		</div>
 	);
 }
