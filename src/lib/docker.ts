@@ -69,17 +69,23 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 			return { error: 'Docker container already exists', status: 400 };
 		}
 
+		const ports: { in: number; out?: number }[] = [];
+		const mounts: { source: string; target: string }[] = [];
+		const env: { key: string; value: string }[] = [];
+
 		const newDocker = await DockerModel.create({
 			name: `${service.slug}-${name}`,
 			status: 'starting',
 			image,
 			service: serviceId,
 			currentStatus: 'starting',
+			mounts,
+			ports,
 		});
 
 		await Service.updateOne({ $push: { dockers: newDocker._id } });
 
-		continueDockerCreation(newDocker, image, service.slug, name);
+		continueDockerCreation(newDocker, image, service.slug, name, env, ports, mounts);
 
 		return { success: true };
 	} catch (error) {
@@ -88,28 +94,49 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 	}
 }
 
-async function continueDockerCreation(newDocker: any, image: string, serviceSlug: string, name: string) {
+async function continueDockerCreation(newDocker: any, image: string, serviceSlug: string, name: string, env: { key: string; value: string }[], ports: { in: number; out?: number }[], mounts: { source: string; target: string }[]) {
 	try {
 		await ensureImageExists(image);
 
 		const container = await docker.createContainer({
 			name: `${serviceSlug}-${name}`,
 			Image: image,
+			Env: env.map((e) => `${e.key}=${e.value}`),
+			ExposedPorts: ports.reduce((acc: { [key: string]: {} }, p) => {
+				acc[`${p.in}/tcp`] = {};
+				return acc;
+			}, {} as { [key: string]: {} }),
+			HostConfig: {
+				PortBindings: ports.reduce((acc: { [key: string]: [{ HostPort: string }] }, p) => {
+					acc[`${p.in}/tcp`] = [{ HostPort: `${p.out}` }];
+					return acc;
+				}, {} as { [key: string]: [{ HostPort: string }] }),
+				Binds: mounts.map((m) => `${m.source}:${m.target}`),
+			},
 		});
-
 		await container.start();
-		console.log('Container started:', container);
 
 		const containerDetails = await container.inspect();
-		const containerStatus = containerDetails.State.Status;
-
 		await DockerModel.updateOne(
 			{ _id: newDocker._id },
 			{
 				$set: {
 					status: 'running',
-					currentStatus: containerStatus,
+					currentStatus: containerDetails.State.Status,
 					id: container.id,
+					ports: Object.keys(containerDetails.NetworkSettings.Ports).map((key) => {
+						const [inPort, protocol] = key.split('/');
+						const portBinding = containerDetails.NetworkSettings.Ports[key];
+
+						if (portBinding) {
+							return {
+								in: parseInt(inPort, 10),
+								out: parseInt(portBinding[0].HostPort, 10),
+							};
+						} else {
+							return { in: parseInt(inPort, 10) };
+						}
+					}),
 				},
 			}
 		);
