@@ -89,7 +89,7 @@ export async function getService(email: string | null | undefined, id: string): 
 				{
 					_id: { $in: service.dockers },
 				},
-				{ _id: 0 }
+				{ _id: 0, __v: 0, 'ports._id': 0, 'mounts._id': 0 } //
 			);
 		}
 
