@@ -35,7 +35,7 @@ export function EditServiceForm({ service, trigger }: { service: ServiceType; tr
 				body: JSON.stringify({
 					name: name !== '' ? name : undefined,
 					description: description !== '' ? description : undefined,
-					repository: repository !== '' ? repository : undefined,
+					repositoryUrl: repository !== '' ? repository : undefined,
 				}),
 			});
 

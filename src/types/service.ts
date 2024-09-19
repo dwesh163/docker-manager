@@ -4,10 +4,10 @@ export interface ServicesType {
 	name: string;
 	status: string;
 	url: string;
-	repository?: {
+	repository: {
 		url: string;
 		image: string;
-	};
+	} | null;
 }
 
 export interface ServiceType {
@@ -19,9 +19,9 @@ export interface ServiceType {
 	users: string[];
 	dockers: DockerType[];
 	url: string;
-	repository?: {
+	repository: {
 		url: string;
 		image: string;
-	};
+	} | null;
 	createdAt: Date;
 }

@@ -32,31 +32,12 @@ export async function getServices(email: string | null | undefined): Promise<Ser
 
 	const resolvedServices = await Promise.all(
 		services.map(async (service) => {
-			if (!service.repository) {
-				return {
-					id: service._id.toString(),
-					name: service.name,
-					status: service.status,
-					url: service.url,
-				};
-			}
-
-			const response = await fetch(`https://api.github.com/repos/${service.repository.replace('https://github.com/', '')}`, {
-				headers: {
-					Authorization: `token ${process.env.GITHUB_TOKEN}`,
-				},
-			});
-			const repository = await response.json();
-
 			return {
 				id: service._id.toString(),
 				name: service.name,
 				status: service.status,
 				url: service.url,
-				repository: {
-					url: service.repository,
-					image: repository?.owner.avatar_url || 'Not found',
-				},
+				repository: service.repository?.url ? service.repository : null,
 			};
 		})
 	);
@@ -98,28 +79,10 @@ export async function getService(email: string | null | undefined, id: string): 
 
 	const owner = await User.findOne<IUser>({ _id: service.owner });
 
-	if (!service.repository) {
-		return {
-			...service.toObject(),
-			owner: owner?.name,
-			id,
-		};
-	}
-
-	const response = await fetch(`https://api.github.com/repos/${service.repository.replace('https://github.com/', '')}`, {
-		headers: {
-			Authorization: `token ${process.env.GITHUB_TOKEN}`,
-		},
-	});
-	const repository = await response.json();
-
 	return {
 		...service.toObject(),
 		owner: owner?.name,
-		repository: {
-			url: service.repository,
-			image: repository?.owner?.avatar_url || '',
-		},
+		repository: service.repository?.url ? service.repository : null,
 		id,
 	};
 }
@@ -140,7 +103,6 @@ export async function createService(data: { name: string; description: string; o
 		name: data.name,
 		description: data.description,
 		owner: user,
-		repository: '',
 		users: [],
 	});
 
@@ -157,7 +119,7 @@ export async function createService(data: { name: string; description: string; o
 	};
 }
 
-export async function updateService({ name, description, repository, id, email }: { name: string | undefined; description: string | undefined; repository: string | undefined; id: string; email: string }): Promise<ErrorType> {
+export async function updateService({ name, description, repositoryUrl, id, email }: { name: string | undefined; description: string | undefined; repositoryUrl: string | undefined; id: string; email: string }): Promise<ErrorType> {
 	await db.connect();
 
 	if (!email) {
@@ -195,15 +157,28 @@ export async function updateService({ name, description, repository, id, email }
 		};
 	}
 
-	console.log('repository', repository); // undefined
-	console.log('service', service._id);
+	let repository;
+
+	if (repositoryUrl) {
+		const response = await fetch(`https://api.github.com/repos/${repositoryUrl.replace('https://github.com/', '')}`, {
+			headers: {
+				Authorization: `token ${process.env.GITHUB_TOKEN}`,
+			},
+		});
+		repository = await response.json();
+	}
 
 	const updatedService = await Service.updateOne(
 		{ _id: service._id },
 		{
 			name: name || service.name,
 			description: description || service.description,
-			repository: repository ? repository.replace(/\/$/, '') : null,
+			repository: repository
+				? {
+						url: repositoryUrl,
+						image: repository?.owner?.avatar_url || '',
+				  }
+				: null,
 		}
 	);
 
