@@ -80,7 +80,7 @@ export async function getNetworks(): Promise<NetwoksType[]> {
 
 			return {
 				name: network.name,
-				dockers: dockersData.map((docker) => ({ name: docker.name })),
+				dockers: dockersData.map((docker) => ({ name: docker.name, image: docker.image })),
 			};
 		});
 
