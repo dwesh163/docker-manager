@@ -87,7 +87,7 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 			networks: [network._id],
 		});
 
-		await Service.updateOne({ $push: { dockers: newDocker._id } });
+		await Service.updateOne({ _id: serviceId }, { $push: { dockers: newDocker._id } });
 
 		continueDockerCreation(newDocker, image, service.slug, name, network.id, env, ports, mounts);
 
