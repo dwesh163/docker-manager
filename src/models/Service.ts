@@ -14,7 +14,7 @@ export interface IService extends Document {
 		url: string;
 		image: string;
 	} | null;
-	network: string;
+	network: String;
 	createdAt: Date;
 }
 
