@@ -4,6 +4,7 @@ import { Docker as DockerModel } from '@/models/Docker';
 import { Service } from '@/models/Service';
 import { Image } from '@/models/Image';
 import { getNetwork } from './network';
+import { updateServiceStatus } from './monitoring';
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock', version: 'v1.46' });
 
@@ -89,7 +90,9 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 
 		await Service.updateOne({ _id: serviceId }, { $push: { dockers: newDocker._id } });
 
-		continueDockerCreation(newDocker, image, service.slug, name, network.id, env, ports, mounts);
+		continueDockerCreation(serviceId, newDocker, image, service.slug, name, network.id, env, ports, mounts);
+
+		await updateServiceStatus(serviceId);
 
 		return { success: true };
 	} catch (error) {
@@ -98,7 +101,7 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 	}
 }
 
-async function continueDockerCreation(newDocker: any, image: string, serviceSlug: string, name: string, network: string, env: { key: string; value: string }[], ports: { in: number; out?: number }[], mounts: { source: string; target: string }[]) {
+async function continueDockerCreation(serviceId: string, newDocker: any, image: string, serviceSlug: string, name: string, network: string, env: { key: string; value: string }[], ports: { in: number; out?: number }[], mounts: { source: string; target: string }[]) {
 	try {
 		await ensureImageExists(image);
 
