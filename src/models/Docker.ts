@@ -7,6 +7,7 @@ export interface IDocker extends Document {
 	status: string;
 	currentStatus: string;
 	startedAt: Date;
+	networks: string[];
 	mounts: {
 		source: string;
 		target: string;
@@ -23,6 +24,7 @@ const dockerSchema = new mongoose.Schema<IDocker>({
 	status: { type: String, required: true },
 	currentStatus: { type: String, required: true },
 	startedAt: { type: Date, required: true, default: Date.now },
+	networks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Network' }],
 	mounts: [{ type: { source: String, target: String } }],
 	ports: [{ type: { in: Number, out: Number } }],
 });
