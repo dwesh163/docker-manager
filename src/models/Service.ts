@@ -14,6 +14,7 @@ export interface IService extends Document {
 		url: string;
 		image: string;
 	} | null;
+	network: string;
 	createdAt: Date;
 }
 
@@ -30,6 +31,7 @@ const serviceSchema = new mongoose.Schema<IService>({
 		image: { type: String, required: false },
 	},
 	dockers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Docker', required: false }],
+	network: { type: mongoose.Schema.Types.ObjectId, ref: 'Network', required: false },
 	createdAt: { type: Date, required: true, default: Date.now },
 });
 
