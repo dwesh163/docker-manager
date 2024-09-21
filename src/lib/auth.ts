@@ -6,6 +6,7 @@ import { IUser, User } from '@/models/User';
 import db from '@/lib/mongo';
 import { isPasswordValid } from '@/lib/hash';
 import { JWT } from 'next-auth/jwt';
+import { getRole } from './user';
 
 // Define NextAuth options
 export const authOptions: NextAuthOptions = {
@@ -59,8 +60,10 @@ export const authOptions: NextAuthOptions = {
 	},
 	callbacks: {
 		async jwt({ token, user, account }: { token: any; user: AuthUser | AdapterUser; account: any }) {
+			const role = await getRole(token.email as string);
 			if (user) {
 				token.isTwoFactorComplete = (user as AdapterUser).isTwoFactorComplete || false;
+				token.role = role || null;
 			}
 
 			return token;
