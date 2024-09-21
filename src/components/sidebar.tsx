@@ -24,7 +24,7 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 						<Server className="h-5 w-5" />
 						Services
 					</Link>
-					<Link href="/networks" className={cn('flex items-center gap-4 px-2.5', pathname === '/network' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
+					<Link href="/networks" className={cn('flex items-center gap-4 px-2.5', pathname === '/networks' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 						<Network className="h-5 w-5" />
 						Networks
 					</Link>
