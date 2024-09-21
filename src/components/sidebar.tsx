@@ -24,9 +24,9 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 						<Server className="h-5 w-5" />
 						Services
 					</Link>
-					<Link href="/network" className={cn('flex items-center gap-4 px-2.5', pathname === '/network' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
+					<Link href="/networks" className={cn('flex items-center gap-4 px-2.5', pathname === '/network' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 						<Network className="h-5 w-5" />
-						Network
+						Networks
 					</Link>
 					<Link href="/domain" className={cn('flex items-center gap-4 px-2.5', pathname === '/domain' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 						<Globe className="h-5 w-5" />
@@ -53,9 +53,9 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 								<Settings className="h-5 w-5" />
 								Settings
 							</Link>
-							<Link href="/docker" className={cn('flex items-center gap-4 px-2.5', pathname === '/docker' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
+							<Link href="/dockers" className={cn('flex items-center gap-4 px-2.5', pathname === '/docker' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 								<Container className="h-5 w-5" />
-								Docker
+								Dockers
 							</Link>
 							<Link href="/builds" className={cn('flex items-center gap-4 px-2.5', pathname === '/builds' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 								<Drill className="h-5 w-5" />
