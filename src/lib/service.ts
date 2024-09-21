@@ -5,6 +5,7 @@ import { getRole } from './user';
 import { IUser, User } from '@/models/User';
 import { ErrorType } from '@/types/error';
 import { Docker } from '@/models/Docker';
+import { createNetwork } from './network';
 
 export async function getServices(email: string | null | undefined): Promise<ServicesType[]> {
 	await db.connect();
@@ -59,8 +60,7 @@ export async function getService(email: string | null | undefined, id: string): 
 		let service;
 
 		if (role.includes('admin')) {
-			service = await Service.findOne<IService>({ _id: id }, { _id: 0 });
-			console.log(service);
+			service = await Service.findOne<IService>({ _id: id }, { _id: 0, __v: 0, network: 0 });
 		} else {
 			const user = await User.findOne<IUser>({ email });
 
@@ -72,11 +72,9 @@ export async function getService(email: string | null | undefined, id: string): 
 				{
 					$or: [{ owner: user._id }, { users: user._id }],
 				},
-				{ _id: 0 }
+				{ _id: 0, __v: 0, network: 0 }
 			);
 		}
-
-		console.log(service);
 
 		if (!service) {
 			return null;
@@ -89,7 +87,7 @@ export async function getService(email: string | null | undefined, id: string): 
 				{
 					_id: { $in: service.dockers },
 				},
-				{ _id: 0, __v: 0, 'ports._id': 0, 'mounts._id': 0 } //
+				{ _id: 0, __v: 0, 'ports._id': 0, 'mounts._id': 0, 'network._id': 0 }
 			);
 		}
 
@@ -100,7 +98,7 @@ export async function getService(email: string | null | undefined, id: string): 
 			id,
 		};
 	} catch (error) {
-		console.error('Erreur lors de la récupération du service:', error);
+		console.error('Error:', error);
 		return null;
 	}
 }
@@ -117,12 +115,29 @@ export async function createService(data: { name: string; description: string; o
 		};
 	}
 
+	const slug = data.name.toLowerCase().replace(/ /g, '-');
+
+	const existingService = await Service.findOne<IService>({ slug });
+
+	if (existingService) {
+		return {
+			error: 'Service already exists',
+			status: 400,
+		};
+	}
+
+	const network = await createNetwork({ name: slug + '-network' });
+
+	console.log('Network:', network);
+
 	const service = await Service.create({
 		name: data.name,
 		description: data.description,
 		owner: user,
 		users: [],
-		slug: data.name.toLowerCase().replace(/ /g, '-'),
+		status: 'inactive',
+		slug,
+		network: network._id,
 	});
 
 	if (!service) {
