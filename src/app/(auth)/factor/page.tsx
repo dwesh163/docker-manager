@@ -6,9 +6,6 @@ import { redirect } from 'next/navigation';
 
 export default async function EnablePage() {
 	const session = await getServerSession();
-	const isTwoFactorEnabled = await checkTwoFactorEnabled(session as Session);
-
-	console.log(session);
 
 	if (session === null) {
 		redirect('/signin');
@@ -17,6 +14,8 @@ export default async function EnablePage() {
 	if (session.user.role === 'denied') {
 		redirect('/denied');
 	}
+
+	const isTwoFactorEnabled = await checkTwoFactorEnabled(session as Session);
 
 	if (!isTwoFactorEnabled) {
 		redirect('/enable');
