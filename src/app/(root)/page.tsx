@@ -12,7 +12,7 @@ export default async function HomePage() {
 	const services = await getServices(session?.user.email);
 	const stats = {
 		active: services.reduce((acc, service) => (service.status === 'active' ? acc + 1 : acc), 0),
-		inactive: services.reduce((acc, service) => (service.status === 'inactive' ? acc + 1 : acc), 0),
+		inactive: services.reduce((acc, service) => (service.status === 'down' ? acc + 1 : acc), 0),
 	};
 
 	return (
