@@ -3,6 +3,7 @@ import { getService } from './service';
 import { Docker as DockerModel } from '@/models/Docker';
 import { Service } from '@/models/Service';
 import { Image } from '@/models/Image';
+import { getNetwork } from './network';
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock', version: 'v1.46' });
 
@@ -69,6 +70,8 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 			return { error: 'Docker container already exists', status: 400 };
 		}
 
+		const network = await getNetwork({ serviceId });
+
 		const ports: { in: number; out?: number }[] = [];
 		const mounts: { source: string; target: string }[] = [];
 		const env: { key: string; value: string }[] = [];
@@ -81,11 +84,12 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 			currentStatus: 'starting',
 			mounts,
 			ports,
+			network: [network._id],
 		});
 
 		await Service.updateOne({ $push: { dockers: newDocker._id } });
 
-		continueDockerCreation(newDocker, image, service.slug, name, env, ports, mounts);
+		continueDockerCreation(newDocker, image, service.slug, name, network.id, env, ports, mounts);
 
 		return { success: true };
 	} catch (error) {
@@ -94,7 +98,7 @@ export async function createDocker({ name, image, serviceId, owner }: { name: st
 	}
 }
 
-async function continueDockerCreation(newDocker: any, image: string, serviceSlug: string, name: string, env: { key: string; value: string }[], ports: { in: number; out?: number }[], mounts: { source: string; target: string }[]) {
+async function continueDockerCreation(newDocker: any, image: string, serviceSlug: string, name: string, network: string, env: { key: string; value: string }[], ports: { in: number; out?: number }[], mounts: { source: string; target: string }[]) {
 	try {
 		await ensureImageExists(image);
 
@@ -112,6 +116,7 @@ async function continueDockerCreation(newDocker: any, image: string, serviceSlug
 					return acc;
 				}, {} as { [key: string]: [{ HostPort: string }] }),
 				Binds: mounts.map((m) => `${m.source}:${m.target}`),
+				NetworkMode: network,
 			},
 		});
 		await container.start();
