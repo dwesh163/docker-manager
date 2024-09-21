@@ -31,6 +31,10 @@ export async function middleware(req: NextRequest) {
 			return NextResponse.redirect(new URL('/factor', req.url));
 		}
 
+		if (token !== null && token?.role === 'denied') {
+			return NextResponse.redirect(new URL('/denied', req.url));
+		}
+
 		return NextResponse.next();
 	} catch (error) {
 		return NextResponse.redirect(new URL('/signin', req.url));
@@ -46,6 +50,6 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 */
-		'/((?!api|_next/static|_next/image|factor|favicon.ico).*)',
+		'/((?!api|_next/static|_next/image|factor|denied|favicon.ico).*)',
 	],
 };
