@@ -3,5 +3,6 @@ export interface NetwoksType {
 	dockers: {
 		name: string;
 		status: string;
+		image: string;
 	}[];
 }
