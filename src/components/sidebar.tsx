@@ -41,10 +41,10 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 						Backup
 					</Link>
 				</div>
-				<h3 className="text-lg font-medium text-muted-foreground">Admin</h3>
-				<div className="grid gap-2 text-xl font-medium -mt-3">
-					{role?.includes('admin') && (
-						<>
+				{role?.includes('admin') && (
+					<>
+						<h3 className="text-lg font-medium text-muted-foreground">Admin</h3>
+						<div className="grid gap-2 text-xl font-medium -mt-3">
 							<Link href="/secrets" className={cn('flex items-center gap-4 px-2.5', pathname === '/secrets' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} prefetch={false}>
 								<KeyRound className="h-5 w-5" />
 								Secrets
@@ -65,9 +65,9 @@ export default function Sidebar({ session, role }: { session: Session; role: str
 								<Users className="h-5 w-5" />
 								Users
 							</Link>
-						</>
-					)}
-				</div>
+						</div>
+					</>
+				)}
 			</nav>
 		</aside>
 	);
