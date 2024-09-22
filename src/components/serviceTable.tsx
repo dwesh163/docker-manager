@@ -64,7 +64,7 @@ export function ServiceTable({ services }: { services: ServicesType[] }) {
 											<p className="text-base">{s.status === 'running' ? 'Online' : 'Offline'}</p>
 										</div>
 										{s.url && <p className="text-base">-</p>}
-										{s.url}
+										<p className="text-base">{s.url}</p>
 									</div>
 								</TableCell>
 								<TableCell>
