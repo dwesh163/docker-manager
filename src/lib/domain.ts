@@ -1,0 +1,89 @@
+import { Domain as DomainModel } from '@/models/Domain';
+import { Service as ServiceModel } from '@/models/Service';
+import { DomainsType } from '@/types/domain';
+import { getRole } from './user';
+import { getServices } from './service';
+import { ErrorType } from '@/types/error';
+import db from '@/lib/mongo';
+
+export async function getDomains(email: string | null | undefined): Promise<DomainsType[]> {
+	try {
+		await db.connect();
+
+		if (!email) {
+			return [];
+		}
+
+		const role = await getRole(email);
+
+		if (!role) {
+			return [];
+		}
+
+		const services = await getServices(email);
+
+		const domains = await DomainModel.find();
+
+		const resolvedDomains = domains.map((domain) => {
+			const service = services.find((s) => s.id === domain.service.toString());
+
+			if (!service && !role.includes('admin')) {
+				return null;
+			}
+
+			return {
+				id: domain._id.toString(),
+				subdomain: domain.subdomain,
+				domain: domain.domain,
+				service: service
+					? {
+							name: service.name,
+							id: service.id,
+					  }
+					: null,
+			};
+		});
+
+		return resolvedDomains.filter((d) => d !== null) as DomainsType[];
+	} catch (error) {
+		console.error('Error getting domains:', error);
+		return [];
+	}
+}
+
+export async function createDomain({ subdomain, domain, service, owner }: { subdomain: string; domain: string; service: string; owner: string }): Promise<ErrorType> {
+	try {
+		await db.connect();
+
+		const existingDomain = await DomainModel.findOne({ subdomain, domain });
+		if (existingDomain) {
+			return { error: 'Domain already exists', status: 400 };
+		}
+
+		const existingService = await ServiceModel.findOne({ _id: service });
+		if (!existingService) {
+			return { error: 'Service not found', status: 404 };
+		}
+
+		const newDomain = await DomainModel.create({
+			subdomain,
+			domain,
+			service: existingService._id,
+		});
+
+		if (!newDomain) {
+			return {
+				error: 'Error creating domain',
+				status: 500,
+			};
+		}
+
+		return {
+			error: '',
+			status: 200,
+		};
+	} catch (error) {
+		console.error('Error creating domain:', error);
+		return { error: 'Internal Server Error', status: 500 };
+	}
+}
