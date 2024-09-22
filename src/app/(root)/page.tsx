@@ -1,17 +1,15 @@
 'use server';
-import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { getServerSession, Session } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { ServicesType } from '@/types/service';
 import { getServices } from '@/lib/service';
-import { CircleAlert, MoveVertical, Server } from 'lucide-react';
+import { CircleAlert, Server } from 'lucide-react';
 
 export default async function HomePage() {
 	const session: Session | null = await getServerSession(authOptions);
 	const services = await getServices(session?.user.email);
 	const stats = {
-		active: services.reduce((acc, service) => (service.status === 'active' ? acc + 1 : acc), 0),
+		active: services.reduce((acc, service) => (service.status === 'running' ? acc + 1 : acc), 0),
 		inactive: services.reduce((acc, service) => (service.status === 'down' ? acc + 1 : acc), 0),
 	};
 
