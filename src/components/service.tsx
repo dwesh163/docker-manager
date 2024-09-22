@@ -71,12 +71,16 @@ export function Service({ service }: { service: ServiceType }) {
 			<Tabs defaultValue="dockers" className="mt-12">
 				<TabsList>
 					<TabsTrigger value="dockers">Containers</TabsTrigger>
+					<TabsTrigger value="domain">Domain</TabsTrigger>
 					<TabsTrigger value="users">Users</TabsTrigger>
 					<TabsTrigger value="secrets">Secrets</TabsTrigger>
 					<TabsTrigger value="build">Build</TabsTrigger>
 				</TabsList>
-				<TabsContent value="dockers">
-					<DockerTable dockers={service.dockers} />
+				<TabsContent value="dockers" className="sm:h-[520px]">
+					<DockerTabs dockers={service.dockers} />
+				</TabsContent>
+				<TabsContent value="domain" className="sm:h-[520px]">
+					<DomainTabs service={service} />
 				</TabsContent>
 				<TabsContent value="users">Users</TabsContent>
 				<TabsContent value="secrets">Secrets</TabsContent>
@@ -88,7 +92,7 @@ export function Service({ service }: { service: ServiceType }) {
 
 const PAGE_SIZE = 5;
 
-function DockerTable({ dockers }: { dockers: DockerType[] }) {
+function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 	const [currentPage, setCurrentPage] = useState(1);
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -108,7 +112,7 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 	};
 
 	return (
-		<Card className="h-full w-full">
+		<Card className="h-full sm:h-[520px] w-full">
 			<CardHeader className="px-7">
 				<div className="flex items-center justify-between">
 					<div>
@@ -162,6 +166,95 @@ function DockerTable({ dockers }: { dockers: DockerType[] }) {
 							{startIndex + 1}-{Math.min(endIndex, dockers.length)}
 						</strong>{' '}
 						of <strong>{dockers.length}</strong> containers
+					</div>
+					<div className="flex space-x-2">
+						<Button variant="outline" disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)}>
+							Previous
+						</Button>
+						<Button variant="outline" disabled={currentPage === totalPages} onClick={() => goToPage(currentPage + 1)}>
+							Next
+						</Button>
+					</div>
+				</div>
+			</CardFooter>
+		</Card>
+	);
+}
+
+function DomainTabs({ service }: { service: ServiceType }) {
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const startIndex = (currentPage - 1) * PAGE_SIZE;
+	const endIndex = startIndex + PAGE_SIZE;
+	const router = useRouter();
+	const pathname = usePathname();
+	const ServiceId = pathname.split('/')[2];
+
+	const paginatedDomains = service.domains.slice(startIndex, endIndex);
+
+	const totalPages = Math.ceil(service.domains.length / PAGE_SIZE);
+
+	const goToPage = (page: number) => {
+		if (page > 0 && page <= totalPages) {
+			setCurrentPage(page);
+		}
+	};
+
+	return (
+		<Card className="h-full w-full">
+			<CardHeader className="px-7">
+				<div className="flex items-center justify-between">
+					<div>
+						<CardTitle>Domain</CardTitle>
+						<CardDescription>Expose your service to the web with a domain</CardDescription>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent>
+				<Table className="text-base">
+					<TableHeader>
+						<TableRow className="hover:bg-card">
+							<TableHead className="w-[20%]">Name</TableHead>
+							<TableHead className="w-[10%]">Status</TableHead>
+							<TableHead className="w-[15%]">Image</TableHead>
+							<TableHead className="w-[30%]">Ports</TableHead>
+							<TableHead>Started</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{paginatedDomains.map((d, index) => (
+							<TableRow key={'docker' + index}>
+								<TableCell className="font-medium">{d.name}</TableCell>
+								<TableCell>
+									<Badge className={cn(d.status == 'running' && 'bg-green-500 hover:bg-green-600', d.status == 'starting' && 'bg-orange-500 hover:bg-orange-600', d.status == 'failed' && 'bg-red-500 hover:bg-red-600', 'text-white select-none w-20 flex justify-center text-center')} variant={d.status == 'running' ? 'secondary' : 'outline'}>
+										{d.status}
+									</Badge>
+								</TableCell>
+								<TableCell>{d.image}</TableCell>
+								<TableCell className="flex gap-1">
+									{d.ports.map((p, index) => (
+										<p key={'port' + index}>
+											{p.in}
+											{p.out ? `:${p.out}` : '/tcp'}
+											{index !== d.ports.length - 1 && ','}{' '}
+										</p>
+									))}
+								</TableCell>
+								<TableCell>{d.startedAt && <p className="text-muted-foreground">Started {moment(new Date(d.startedAt), 'YYYYMMDD').fromNow()}</p>}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+			{}
+			<CardFooter>
+				<div className="flex justify-between w-full items-center">
+					<div className="text-xs text-muted-foreground">
+						Showing{' '}
+						<strong>
+							{startIndex + 1}-{Math.min(endIndex, service.domains.length)}
+						</strong>{' '}
+						of <strong>{service.domains.length}</strong> Domains
 					</div>
 					<div className="flex space-x-2">
 						<Button variant="outline" disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)}>
