@@ -48,7 +48,7 @@ export function Service({ service }: { service: ServiceType }) {
 						</div>
 					</div>
 
-					<div className="mt-1">
+					{/* <div className="mt-1">
 						{service.repository ? (
 							<Link href={service?.repository?.url} target="_blank" className="flex gap-1 items-center cursor-pointer">
 								{service?.repository?.image !== '' ? <Image src={service?.repository?.image} alt="Repository owner" width={32} height={32} className="rounded-full" /> : <div className="w-8 h-8 bg-background rounded-full" />}
@@ -65,7 +65,7 @@ export function Service({ service }: { service: ServiceType }) {
 								}
 							/>
 						)}
-					</div>
+					</div> */}
 				</div>
 			</div>
 			<Tabs defaultValue="dockers" className="mt-12">
@@ -77,10 +77,10 @@ export function Service({ service }: { service: ServiceType }) {
 					<TabsTrigger value="build">Build</TabsTrigger>
 				</TabsList>
 				<TabsContent value="dockers" className="sm:h-[520px]">
-					<DockerTabs dockers={service.dockers} />
+					{/* <DockerTabs dockers={service.dockers} /> */}
 				</TabsContent>
 				<TabsContent value="domain" className="sm:h-[520px]">
-					<DomainTabs service={service} />
+					{/* <DomainTabs service={service} /> */}
 				</TabsContent>
 				<TabsContent value="users">Users</TabsContent>
 				<TabsContent value="secrets">Secrets</TabsContent>
@@ -119,7 +119,7 @@ function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 						<CardTitle>Containers</CardTitle>
 						<CardDescription>Manage and monitor your Docker containers.</CardDescription>
 					</div>
-					<CreateDockerForm ServiceId={ServiceId} />
+					{/* <CreateDockerForm ServiceId={ServiceId} /> */}
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -184,11 +184,11 @@ function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 function DomainTabs({ service }: { service: ServiceType }) {
 	const [currentPage, setCurrentPage] = useState(1);
 
+	console.log('service', service);
+
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndex = startIndex + PAGE_SIZE;
-	const router = useRouter();
 	const pathname = usePathname();
-	const ServiceId = pathname.split('/')[2];
 
 	const paginatedDomains = service.domains.slice(startIndex, endIndex);
 
@@ -214,39 +214,20 @@ function DomainTabs({ service }: { service: ServiceType }) {
 				<Table className="text-base">
 					<TableHeader>
 						<TableRow className="hover:bg-card">
-							<TableHead className="w-[20%]">Name</TableHead>
-							<TableHead className="w-[10%]">Status</TableHead>
-							<TableHead className="w-[15%]">Image</TableHead>
-							<TableHead className="w-[30%]">Ports</TableHead>
-							<TableHead>Started</TableHead>
+							<TableHead className="w-[20%]">Url</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{paginatedDomains.map((d, index) => (
-							<TableRow key={'docker' + index}>
-								<TableCell className="font-medium">{d.name}</TableCell>
-								<TableCell>
-									<Badge className={cn(d.status == 'running' && 'bg-green-500 hover:bg-green-600', d.status == 'starting' && 'bg-orange-500 hover:bg-orange-600', d.status == 'failed' && 'bg-red-500 hover:bg-red-600', 'text-white select-none w-20 flex justify-center text-center')} variant={d.status == 'running' ? 'secondary' : 'outline'}>
-										{d.status}
-									</Badge>
+							<TableRow key={'domain' + index}>
+								<TableCell className="font-medium">
+									{d.subdomain && d.subdomain + '.'}${d.domain}
 								</TableCell>
-								<TableCell>{d.image}</TableCell>
-								<TableCell className="flex gap-1">
-									{d.ports.map((p, index) => (
-										<p key={'port' + index}>
-											{p.in}
-											{p.out ? `:${p.out}` : '/tcp'}
-											{index !== d.ports.length - 1 && ','}{' '}
-										</p>
-									))}
-								</TableCell>
-								<TableCell>{d.startedAt && <p className="text-muted-foreground">Started {moment(new Date(d.startedAt), 'YYYYMMDD').fromNow()}</p>}</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
 				</Table>
 			</CardContent>
-			{}
 			<CardFooter>
 				<div className="flex justify-between w-full items-center">
 					<div className="text-xs text-muted-foreground">
