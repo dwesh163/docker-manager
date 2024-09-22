@@ -1,4 +1,4 @@
-import { createService } from '@/lib/service';
+import { createService, getServices } from '@/lib/service';
 import { getServerSession, Session } from 'next-auth';
 import { NextResponse } from 'next/server';
 
@@ -22,4 +22,16 @@ export async function POST(req: Request) {
 	}
 
 	return NextResponse.json({ success: true });
+}
+
+export async function GET(req: Request) {
+	const session: Session | null = await getServerSession();
+
+	if (!session) {
+		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
+	const services = await getServices(session.user.email);
+
+	return NextResponse.json(services);
 }
