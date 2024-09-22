@@ -48,7 +48,7 @@ export function Service({ service }: { service: ServiceType }) {
 						</div>
 					</div>
 
-					{/* <div className="mt-1">
+					<div className="mt-1">
 						{service.repository ? (
 							<Link href={service?.repository?.url} target="_blank" className="flex gap-1 items-center cursor-pointer">
 								{service?.repository?.image !== '' ? <Image src={service?.repository?.image} alt="Repository owner" width={32} height={32} className="rounded-full" /> : <div className="w-8 h-8 bg-background rounded-full" />}
@@ -65,7 +65,7 @@ export function Service({ service }: { service: ServiceType }) {
 								}
 							/>
 						)}
-					</div> */}
+					</div>
 				</div>
 			</div>
 			<Tabs defaultValue="dockers" className="mt-12">
@@ -77,10 +77,10 @@ export function Service({ service }: { service: ServiceType }) {
 					<TabsTrigger value="build">Build</TabsTrigger>
 				</TabsList>
 				<TabsContent value="dockers" className="sm:h-[520px]">
-					{/* <DockerTabs dockers={service.dockers} /> */}
+					<DockerTabs dockers={service.dockers} />
 				</TabsContent>
 				<TabsContent value="domain" className="sm:h-[520px]">
-					{/* <DomainTabs service={service} /> */}
+					<DomainTabs service={service} />
 				</TabsContent>
 				<TabsContent value="users">Users</TabsContent>
 				<TabsContent value="secrets">Secrets</TabsContent>
@@ -119,7 +119,7 @@ function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 						<CardTitle>Containers</CardTitle>
 						<CardDescription>Manage and monitor your Docker containers.</CardDescription>
 					</div>
-					{/* <CreateDockerForm ServiceId={ServiceId} /> */}
+					<CreateDockerForm ServiceId={ServiceId} />
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -184,7 +184,7 @@ function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 function DomainTabs({ service }: { service: ServiceType }) {
 	const [currentPage, setCurrentPage] = useState(1);
 
-	console.log('service', service);
+	console.log('service-9999', service);
 
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndex = startIndex + PAGE_SIZE;
