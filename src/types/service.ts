@@ -26,4 +26,10 @@ export interface ServiceType {
 		image: string;
 	} | null;
 	createdAt: Date;
+	domains: {
+		subdomain: string;
+		domain: string;
+		port?: number;
+		docker?: string;
+	}[];
 }
