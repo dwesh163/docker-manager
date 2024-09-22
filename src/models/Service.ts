@@ -8,7 +8,6 @@ export interface IService extends Document {
 	dockers: string[];
 	slug: string;
 	owner: String;
-	url: string;
 	status: string;
 	repository: {
 		url: string;
@@ -25,7 +24,6 @@ const serviceSchema = new mongoose.Schema<IService>({
 	owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 	status: { type: String, required: true, default: 'Not configured' },
 	slug: { type: String, required: true },
-	url: { type: String, required: false },
 	repository: {
 		url: { type: String, required: false },
 		image: { type: String, required: false },
