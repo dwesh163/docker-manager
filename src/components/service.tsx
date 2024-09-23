@@ -15,8 +15,11 @@ import { DockerType } from '@/types/docker';
 import { useRouter, usePathname } from 'next/navigation';
 import { CreateDockerForm } from '@/components/forms/createDockerForm';
 import moment from 'moment';
+import { CreateDomainForm } from './forms/createDomainForm';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function Service({ service }: { service: ServiceType }) {
+export function Service({ serializedService }: { serializedService: string }) {
+	const service: ServiceType = JSON.parse(serializedService);
 	return (
 		<Card className="h-full w-full p-12">
 			<div className="flex gap-4 w-full">
@@ -49,7 +52,7 @@ export function Service({ service }: { service: ServiceType }) {
 					</div>
 
 					<div className="mt-1">
-						{service.repository ? (
+						{service.repository != null ? (
 							<Link href={service?.repository?.url} target="_blank" className="flex gap-1 items-center cursor-pointer">
 								{service?.repository?.image !== '' ? <Image src={service?.repository?.image} alt="Repository owner" width={32} height={32} className="rounded-full" /> : <div className="w-8 h-8 bg-background rounded-full" />}
 								<p className="text-base font-bold">{service?.repository?.url.replace('https://github.com/', '')}</p>
@@ -208,6 +211,7 @@ function DomainTabs({ service }: { service: ServiceType }) {
 						<CardTitle>Domain</CardTitle>
 						<CardDescription>Expose your service to the web with a domain</CardDescription>
 					</div>
+					<CreateDomainForm serviceId={service.id} />
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -215,13 +219,44 @@ function DomainTabs({ service }: { service: ServiceType }) {
 					<TableHeader>
 						<TableRow className="hover:bg-card">
 							<TableHead className="w-[20%]">Url</TableHead>
+							<TableHead className="w-[10%]">Container</TableHead>
+							<TableHead className="w-[10%]">Port</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{paginatedDomains.map((d, index) => (
-							<TableRow key={'domain' + index}>
-								<TableCell className="font-medium">
-									{d.subdomain && d.subdomain + '.'}${d.domain}
+							<TableRow key={'domain' + index} className="font-medium">
+								<TableCell>
+									{d.subdomain && d.subdomain + '.'}
+									{d.domain}
+								</TableCell>
+								<TableCell>
+									<Select>
+										<SelectTrigger className="w-[275px]">
+											<SelectValue placeholder="Unset" />
+										</SelectTrigger>
+										<SelectContent>
+											{service.dockers.map((docker) => (
+												<SelectItem key={'docker' + docker.id} value={docker.id}>
+													{docker.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</TableCell>
+								<TableCell>
+									<Select>
+										<SelectTrigger className="w-[275px]">
+											<SelectValue placeholder="Unset" />
+										</SelectTrigger>
+										<SelectContent>
+											{service.dockers.map((docker) => (
+												<SelectItem key={'docker' + docker.id} value={docker.id}>
+													{docker.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
 								</TableCell>
 							</TableRow>
 						))}
