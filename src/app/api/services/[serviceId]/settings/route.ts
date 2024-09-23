@@ -21,7 +21,7 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
 		return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
 	}
 
-	const service = await updateService({ name, description, repositoryUrl: repositoryUrl !== '' ? repositoryUrl : undefined, id: params.serviceId, email: session?.user?.email || '' });
+	const service = await updateService({ name, description, repositoryUrl: repositoryUrl !== '' ? repositoryUrl.replace(/\/$/, '') : undefined, id: params.serviceId, email: session?.user?.email || '' });
 
 	if (service.error) {
 		return NextResponse.json({ error: service.error }, { status: service.status });
