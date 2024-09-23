@@ -6,7 +6,7 @@ export interface IDomain extends Document {
 	domain: string;
 	service: String;
 	docker: String;
-	port: number;
+	port?: number;
 }
 
 const domainSchema = new mongoose.Schema<IDomain>({
