@@ -59,64 +59,37 @@ export async function getService(email: string | null | undefined, id: string): 
 	try {
 		await db.connect();
 
-		if (!email) {
-			return null;
-		}
+		if (!email) return null;
 
-		const role = await getRole(email);
-		let service;
-		let dockers: ServiceType['dockers'] = [];
+		const [role, user] = await Promise.all([getRole(email), User.findOne<IUser>({ email })]);
 
-		if (role.includes('admin')) {
-			service = await Service.findOne<IService>({ _id: id }, { _id: 0, __v: 0, network: 0 });
-		} else {
-			const user = await User.findOne<IUser>({ email });
+		if (!user) return null;
 
-			if (!user) {
-				return null;
-			}
+		const query = role.includes('admin') ? { _id: id } : { $or: [{ owner: user._id }, { users: user._id }] };
 
-			service = await Service.findOne<IService>(
-				{
-					$or: [{ owner: user._id }, { users: user._id }],
-				},
-				{ _id: 0, __v: 0, network: 0 }
-			);
-		}
+		const service = await Service.findOne<IService>(query, { _id: 0, __v: 0, network: 0 });
+		if (!service) return null;
 
-		if (!service) {
-			return null;
-		}
+		// Fetch the owner and dockers in parallel
+		const [owner, dockersData] = await Promise.all([User.findOne<IUser>({ _id: service.owner }), service.dockers.length ? Docker.find({ _id: { $in: service.dockers } }, { __v: 0, 'ports._id': 0, 'mounts._id': 0, networks: 0 }) : []]);
 
-		console.log('Service:', service);
-		console.log('Service.owner:', service.owner);
-		console.log('Service.id:', id);
-
-		const owner = await User.findOne<IUser>({ _id: service.owner });
-
-		if (service.dockers.length !== 0) {
-			dockers = await Docker.find(
-				{
-					_id: { $in: service.dockers },
-				},
-				{ __v: 0, 'ports._id': 0, 'mounts._id': 0, networks: 0 }
-			);
-		}
-
-		const domains = await Domain.find<IDomain>({ service: id }, { _id: 0, __v: 0, service: 0 });
-
-		dockers = (dockers as IDocker[]).map((docker: IDocker) => ({
+		const dockers: ServiceType['dockers'] = (dockersData as IDocker[]).map((docker: IDocker) => ({
 			id: docker._id.toString(),
 			name: docker.name,
 			image: docker.image,
 			status: docker.status,
 			ports: docker.ports,
-			mounts: docker.mounts,
-		})) as ServiceType['dockers'];
+			mounts: docker.mounts ?? [],
+			currentStatus: docker.currentStatus,
+			startedAt: docker.startedAt,
+		}));
+
+		// Fetch domains related to the service
+		const domains = await Domain.find<IDomain>({ service: id }, { _id: 0, __v: 0, service: 0 });
 
 		return {
 			id,
-			repository: service.repository,
+			repository: service.repository?.url ? { url: service.repository.url, image: service.repository.image } : null,
 			name: service.name,
 			description: service.description,
 			users: service.users,
@@ -125,13 +98,13 @@ export async function getService(email: string | null | undefined, id: string): 
 			slug: service.slug,
 			dockers,
 			createdAt: service.createdAt,
-			domains: domains.map((domain: { subdomain: string | null; domain: string | null; port: number | null; docker: { toString: () => string } }) => ({
+			domains: domains.map((domain) => ({
 				subdomain: domain.subdomain ?? null,
 				domain: domain.domain,
 				port: domain.port ?? null,
 				docker: domain.docker ? domain.docker.toString() : null,
 			})),
-			url: domains.length >= 1 ? `${domains[0].subdomain && domains[0].subdomain + '.'}${domains[0].domain}` : '',
+			url: domains.length ? `${domains[0].subdomain ? domains[0].subdomain + '.' : ''}${domains[0].domain}` : '',
 		};
 	} catch (error) {
 		console.error('Error:', error);
