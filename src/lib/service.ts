@@ -65,7 +65,7 @@ export async function getService(email: string | null | undefined, id: string): 
 
 		const role = await getRole(email);
 		let service;
-		let dockers: IDocker[] = [];
+		let dockers: ServiceType['dockers'] = [];
 
 		if (role.includes('admin')) {
 			service = await Service.findOne<IService>({ _id: id }, { _id: 0, __v: 0, network: 0 });
@@ -105,14 +105,14 @@ export async function getService(email: string | null | undefined, id: string): 
 
 		const domains = await Domain.find<IDomain>({ service: id }, { _id: 0, __v: 0, service: 0 });
 
-		dockers = dockers.map((docker: IDocker) => ({
+		dockers = (dockers as IDocker[]).map((docker: IDocker) => ({
 			id: docker._id.toString(),
 			name: docker.name,
 			image: docker.image,
 			status: docker.status,
 			ports: docker.ports,
 			mounts: docker.mounts,
-		}));
+		})) as ServiceType['dockers'];
 
 		return {
 			id,
@@ -120,11 +120,17 @@ export async function getService(email: string | null | undefined, id: string): 
 			name: service.name,
 			description: service.description,
 			users: service.users,
-			onwer: service.owner,
+			owner: service.owner.toString(),
 			status: service.status,
 			slug: service.slug,
 			dockers,
-			domains,
+			createdAt: service.createdAt,
+			domains: domains.map((domain: { subdomain: string | null; domain: string | null; port: number | null; docker: { toString: () => string } }) => ({
+				subdomain: domain.subdomain ?? null,
+				domain: domain.domain,
+				port: domain.port ?? null,
+				docker: domain.docker ? domain.docker.toString() : null,
+			})),
 			url: domains.length >= 1 ? `${domains[0].subdomain && domains[0].subdomain + '.'}${domains[0].domain}` : '',
 		};
 	} catch (error) {
