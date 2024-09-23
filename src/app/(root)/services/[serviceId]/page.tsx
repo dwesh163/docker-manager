@@ -13,7 +13,7 @@ export default async function ServicePage({ params }: { params: { serviceId: str
 	return (
 		<div className="flex flex-col items-center flex-1 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 w-full">
 			{service ? (
-				<Service service={service} />
+				<Service serializedService={JSON.stringify(service)} />
 			) : (
 				<div className="flex justify-center items-center gap-4 w-full h-[calc(100vh-80px)]">
 					<p>Service not found</p>
