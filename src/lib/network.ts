@@ -19,7 +19,7 @@ export async function createNetwork({ name }: { name: string }): Promise<INetwor
 				throw new Error('Failed to create network in Docker');
 			}
 
-			console.log('Network created in Docker:', network);
+			console.error('Network created in Docker:', network);
 			return existingNetwork;
 		}
 
@@ -29,7 +29,7 @@ export async function createNetwork({ name }: { name: string }): Promise<INetwor
 				name: existingDockerNetwork.Name,
 			});
 
-			console.log('Network created in DB:', createdNetwork);
+			console.error('Network created in DB:', createdNetwork);
 			return createdNetwork;
 		}
 
@@ -40,7 +40,7 @@ export async function createNetwork({ name }: { name: string }): Promise<INetwor
 			}
 
 			const createdNetwork = await Network.create({ id: network.id, name });
-			console.log('Network created in Docker and DB:', createdNetwork);
+			console.error('Network created in Docker and DB:', createdNetwork);
 
 			return createdNetwork;
 		}

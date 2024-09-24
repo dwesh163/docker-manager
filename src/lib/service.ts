@@ -39,8 +39,6 @@ export async function getServices(email: string | null | undefined): Promise<Ser
 		services.map(async (service) => {
 			const url = allDomains.find((d) => d.service.toString() === service._id.toString());
 
-			console.log('url:', url);
-
 			return {
 				id: service._id.toString(),
 				name: service.name,
@@ -137,8 +135,6 @@ export async function createService(data: { name: string; description: string; o
 	}
 
 	const network = await createNetwork({ name: slug + '-network' });
-
-	console.log('Network:', network);
 
 	const service = await Service.create({
 		name: data.name,
