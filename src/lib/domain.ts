@@ -109,10 +109,6 @@ export async function updateDomain({ id, subdomain, domain, service, docker, por
 			return { error: 'Service not found', status: 404 };
 		}
 
-		console.log('serviceID:', serviceId);
-		console.log('dockerID:', docker || existingDomain.docker);
-		console.log('port:', port || existingDomain.port);
-
 		existingDomain.subdomain = subdomain || existingDomain.subdomain;
 		existingDomain.domain = domain || existingDomain.domain;
 		existingDomain.service = existingService._id;
