@@ -92,7 +92,6 @@ export async function updateDomain({ id, subdomain, domain, service, docker, por
 	try {
 		await db.connect();
 
-		console.log('id', id);
 		const existingDomain = await DomainModel.findOne({ _id: id });
 		if (!existingDomain) {
 			return { error: 'Domain not found', status: 404 };
