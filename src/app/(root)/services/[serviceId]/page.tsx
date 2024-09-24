@@ -8,8 +8,6 @@ export default async function ServicePage({ params }: { params: { serviceId: str
 	const session: Session | null = await getServerSession(authOptions);
 	const service = await getService(session?.user.email, params.serviceId);
 
-	console.log('service234', service);
-
 	return (
 		<div className="flex flex-col items-center flex-1 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 w-full">
 			{service ? (
