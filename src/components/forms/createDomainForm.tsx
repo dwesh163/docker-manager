@@ -11,7 +11,7 @@ import { ServicesType } from '@/types/service';
 
 export function CreateDomainForm({ serviceId }: { serviceId?: string }) {
 	const [url, setUrl] = useState('');
-	const [service, setService] = useState(serviceId || '');
+	const [service, setService] = useState('');
 	const [services, setServices] = useState<ServicesType[]>([]);
 	const [error, setError] = useState('');
 	const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +22,6 @@ export function CreateDomainForm({ serviceId }: { serviceId?: string }) {
 			try {
 				const res = await fetch('/api/services');
 				const data = await res.json();
-				console.log('data', data);
 				setServices(data);
 			} catch (error) {
 				setError('Failed to fetch services.');
@@ -31,6 +30,10 @@ export function CreateDomainForm({ serviceId }: { serviceId?: string }) {
 
 		fetchServices();
 	}, []);
+
+	useEffect(() => {
+		if (serviceId) setService(serviceId);
+	}, [serviceId]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
