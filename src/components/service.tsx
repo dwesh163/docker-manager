@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { EditServiceForm } from '@/components/forms/editServiceForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -131,8 +131,8 @@ function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 						<TableRow className="hover:bg-card">
 							<TableHead className="w-[20%]">Name</TableHead>
 							<TableHead className="w-[10%]">Status</TableHead>
-							<TableHead className="w-[15%]">Image</TableHead>
-							<TableHead className="w-[30%]">Ports</TableHead>
+							<TableHead className="w-[25%]">Image</TableHead>
+							<TableHead className="w-[20%]">Ports</TableHead>
 							<TableHead>Started</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -186,17 +186,88 @@ function DockerTabs({ dockers }: { dockers: DockerType[] }) {
 
 function DomainTabs({ service }: { service: ServiceType }) {
 	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedDocker, setSelectedDocker] = useState<{ [key: string]: string }>({});
+	const [selectedPort, setSelectedPort] = useState<{ [key: string]: number | null }>({});
 
-	console.log('service-9999', service);
+	const router = useRouter();
 
+	const PAGE_SIZE = 10;
 	const startIndex = (currentPage - 1) * PAGE_SIZE;
 	const endIndex = startIndex + PAGE_SIZE;
-	const pathname = usePathname();
 
 	const paginatedDomains = service.domains.slice(startIndex, endIndex);
-
 	const totalPages = Math.ceil(service.domains.length / PAGE_SIZE);
 
+	// Fill selectedDocker and selectedPort with initial values from the service
+	useEffect(() => {
+		const dockerSelection: { [key: string]: string } = {};
+		const portSelection: { [key: string]: number | null } = {};
+
+		service.domains.forEach((domain) => {
+			if (domain.docker) {
+				dockerSelection[domain.id] = domain.docker;
+			}
+			if (domain.port) {
+				portSelection[domain.id] = domain.port;
+			} else {
+				portSelection[domain.id] = null;
+			}
+		});
+
+		setSelectedDocker(dockerSelection);
+		setSelectedPort(portSelection);
+	}, [service]);
+
+	// Filter dockers: include unassigned dockers or dockers already selected for the current domain
+	const getAvailableDockers = (domainId: string) => {
+		return service.dockers.filter((docker) => !service.domains.some((domain) => domain.docker === docker.id && domain.id !== domainId) || docker.id === selectedDocker[domainId]);
+	};
+
+	// Handle docker selection and patch the domain
+	const handleDockerSelect = (domainId: string, dockerId: string) => {
+		console.log('domainId:', domainId);
+		console.log('dockerId:', dockerId);
+		setSelectedDocker((prev) => ({ ...prev, [domainId]: dockerId }));
+
+		// Auto-select the port if the docker has only one port
+		const docker = service.dockers.find((d) => d.id === dockerId);
+		if (docker && docker.ports.length === 1) {
+			setSelectedPort((prev) => ({ ...prev, [domainId]: docker.ports[0].in }));
+			patchDomain(domainId, dockerId, docker.ports[0].in);
+		} else {
+			patchDomain(domainId, dockerId, null);
+		}
+	};
+
+	// Handle port selection and patch the domain
+	const handlePortSelect = (domainId: string, port: number) => {
+		setSelectedPort((prev) => ({ ...prev, [domainId]: port }));
+		patchDomain(domainId, selectedDocker[domainId], port);
+	};
+
+	// Patch the domain with the selected docker and port
+	const patchDomain = async (domainId: string, dockerId: string | null, port: number | null) => {
+		try {
+			const response = await fetch(`/api/domains/${domainId}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ docker: dockerId, port }),
+			});
+
+			if (response.ok) {
+				router.refresh();
+				console.log(`Domain ${domainId} updated with docker ${dockerId} and port ${port}`);
+			} else {
+				throw new Error('Failed to update domain');
+			}
+		} catch (error) {
+			console.error(`Failed to update domain ${domainId}:`, error);
+		}
+	};
+
+	// Handle page navigation
 	const goToPage = (page: number) => {
 		if (page > 0 && page <= totalPages) {
 			setCurrentPage(page);
@@ -224,20 +295,20 @@ function DomainTabs({ service }: { service: ServiceType }) {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{paginatedDomains.map((d, index) => (
-							<TableRow key={'domain' + index} className="font-medium">
+						{paginatedDomains.map((domain) => (
+							<TableRow key={domain.id} className="font-medium">
 								<TableCell>
-									{d.subdomain && d.subdomain + '.'}
-									{d.domain}
+									{domain.subdomain && domain.subdomain + '.'}
+									{domain.domain}
 								</TableCell>
 								<TableCell>
-									<Select>
+									<Select onValueChange={(value) => handleDockerSelect(domain.id, value)} value={selectedDocker[domain.id] || ''}>
 										<SelectTrigger className="w-[275px]">
 											<SelectValue placeholder="Unset" />
 										</SelectTrigger>
 										<SelectContent>
-											{service.dockers.map((docker) => (
-												<SelectItem key={'docker' + docker.id} value={docker.id}>
+											{getAvailableDockers(domain.id).map((docker) => (
+												<SelectItem key={docker.id} value={docker.id}>
 													{docker.name}
 												</SelectItem>
 											))}
@@ -245,18 +316,22 @@ function DomainTabs({ service }: { service: ServiceType }) {
 									</Select>
 								</TableCell>
 								<TableCell>
-									<Select>
-										<SelectTrigger className="w-[275px]">
-											<SelectValue placeholder="Unset" />
-										</SelectTrigger>
-										<SelectContent>
-											{service.dockers.map((docker) => (
-												<SelectItem key={'docker' + docker.id} value={docker.id}>
-													{docker.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
+									{selectedDocker[domain.id] && (
+										<Select disabled={service.dockers.find((d) => d.id === selectedDocker[domain.id])?.ports.length === 1} onValueChange={(value) => handlePortSelect(domain.id, Number(value))} value={selectedPort[domain.id]?.toString() || ''}>
+											<SelectTrigger className="w-[275px]">
+												<SelectValue placeholder="Unset" />
+											</SelectTrigger>
+											<SelectContent>
+												{service.dockers
+													.find((d) => d.id === selectedDocker[domain.id])
+													?.ports.map((port) => (
+														<SelectItem key={port.in} value={port.in.toString()}>
+															{port.in}
+														</SelectItem>
+													))}
+											</SelectContent>
+										</Select>
+									)}
 								</TableCell>
 							</TableRow>
 						))}
