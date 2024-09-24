@@ -27,6 +27,7 @@ export interface ServiceType {
 	} | null;
 	createdAt: Date;
 	domains: {
+		id: string;
 		subdomain: string | null;
 		domain: string;
 		port: number | null;

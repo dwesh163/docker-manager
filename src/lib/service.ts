@@ -85,7 +85,7 @@ export async function getService(email: string | null | undefined, id: string): 
 		}));
 
 		// Fetch domains related to the service
-		const domains = await Domain.find<IDomain>({ service: id }, { _id: 0, __v: 0, service: 0 });
+		const domains = await Domain.find<IDomain>({ service: id }, { __v: 0, service: 0 });
 
 		return {
 			id,
@@ -103,6 +103,7 @@ export async function getService(email: string | null | undefined, id: string): 
 				domain: domain.domain,
 				port: domain.port ?? null,
 				docker: domain.docker ? domain.docker.toString() : null,
+				id: domain._id.toString(),
 			})),
 			url: domains.length ? `${domains[0].subdomain ? domains[0].subdomain + '.' : ''}${domains[0].domain}` : '',
 		};
