@@ -87,3 +87,46 @@ export async function createDomain({ subdomain, domain, service, owner }: { subd
 		return { error: 'Internal Server Error', status: 500 };
 	}
 }
+
+export async function updateDomain({ id, subdomain, domain, service, docker, port, owner }: { id: string; subdomain: string; domain: string; service: string; docker: string; port: string; owner: string }): Promise<ErrorType> {
+	try {
+		await db.connect();
+
+		console.log('id', id);
+		const existingDomain = await DomainModel.findOne({ _id: id });
+		if (!existingDomain) {
+			return { error: 'Domain not found', status: 404 };
+		}
+
+		let serviceId = service;
+
+		if (!service) {
+			serviceId = existingDomain.service.toString();
+		}
+
+		const existingService = await ServiceModel.findOne({ _id: serviceId });
+		if (!existingService) {
+			return { error: 'Service not found', status: 404 };
+		}
+
+		console.log('serviceID:', serviceId);
+		console.log('dockerID:', docker || existingDomain.docker);
+		console.log('port:', port || existingDomain.port);
+
+		existingDomain.subdomain = subdomain || existingDomain.subdomain;
+		existingDomain.domain = domain || existingDomain.domain;
+		existingDomain.service = existingService._id;
+		existingDomain.docker = docker || existingDomain.docker;
+		existingDomain.port = port || existingDomain.port;
+
+		await existingDomain.save();
+
+		return {
+			error: '',
+			status: 200,
+		};
+	} catch (error) {
+		console.error('Error updating domain:', error);
+		return { error: 'Internal Server Error', status: 500 };
+	}
+}
